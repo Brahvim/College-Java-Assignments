@@ -25,6 +25,10 @@ public class App {
 
         static class AppExitCodeEnumCounter {
 
+            private AppExitCodeEnumCounter() {
+
+            }
+
             private static int count = 0;
 
         }
@@ -120,6 +124,10 @@ public class App {
             App.exitWithCode(AppExitCode.SOURCE_FILE_IS_DIRECTORY);
         }
 
+        if (destFile.isDirectory()) {
+            // TODO Make sure name of copy is correct when `destFile` is a dir.
+        }
+
         if (destFile.exists() && getPermissionForOverwrites) {
             System.out.printf("DEST file `%s` already exists. Overwrite? [Y/n]: ", destPath);
 
@@ -151,6 +159,8 @@ public class App {
                 }
 
             } catch (final SecurityException e) {
+                // TODO Use `if (!destFile.getParentFile().canWrite())` instead?
+                // What if it's the parent that you can't write to?!
                 System.out.println("Program JVM not currently permitted to write files.");
                 App.exitWithCode(AppExitCode.WRITING_NOT_ALLOWED);
             } catch (final IOException e) {
