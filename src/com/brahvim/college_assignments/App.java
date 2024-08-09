@@ -36,17 +36,15 @@ public class App {
             if (!App.isPrime(i))
                 continue;
 
-            final long lastPrime = i;
-
-            for (i = start; i < lastPrime; i++) {
-                if (!App.isPrime(i))
+            for (long j = start; j < i; j++) {
+                if (!App.isPrime(j))
                     continue;
 
-                System.out.print(i);
+                System.out.print(j);
                 System.out.print(", ");
             }
 
-            System.out.print(lastPrime);
+            System.out.print(i);
             System.out.println('.');
             break;
         }
