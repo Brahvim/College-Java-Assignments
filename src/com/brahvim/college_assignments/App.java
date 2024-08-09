@@ -13,6 +13,8 @@ public class App {
         System.out.print("Till when?: ");
         final long tableEnd = sc.nextLong() + 1;
 
+        sc.close();
+
         for (int i = 1; i < tableEnd; i++)
             System.out.println(String.format("`%d` * `%d` = `%d`.", multiplier, i, multiplier * i));
     }
