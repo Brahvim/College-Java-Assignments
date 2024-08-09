@@ -27,23 +27,28 @@ public class App {
         final long start = sc.nextLong();
 
         System.out.print("What's the *last* number in this range?: ");
-        final long end = sc.nextLong();
+        final long end = sc.nextLong() + 1;
         sc.close();
 
         System.out.println("The primes are:");
 
-        for (long i = start; true; i++) {
+        for (long i = end; true; i--) {
             if (!App.isPrime(i))
                 continue;
 
-            System.out.print(i);
+            final long lastPrime = i;
 
-            if (i >= end) {
-                System.out.println(".");
-                break;
+            for (i = start; i < lastPrime; i++) {
+                if (!App.isPrime(i))
+                    continue;
+
+                System.out.print(i);
+                System.out.print(", ");
             }
 
-            System.out.print(", ");
+            System.out.print(lastPrime);
+            System.out.println('.');
+            break;
         }
     }
 
