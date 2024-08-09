@@ -25,7 +25,7 @@ public class App {
 
         boolean willExplode = true;
         for (final double d : App.NUMBERS)
-            if (Double.compare(userInput, d) == 0)
+            if (userInput != d)
                 willExplode = false;
 
         if (willExplode)
