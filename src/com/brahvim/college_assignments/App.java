@@ -74,8 +74,8 @@ public class App {
             App.exitWithCode(AppExitCode.OK);
         }
 
-        boolean getPermissionForOverwrites = true;
         int sourceStrId = -1, destStrId = -1;
+        boolean getPermissionForOverwrites = true;
 
         for (int i = 0; i < p_args.length; i++) {
             final String s = p_args[i];
@@ -116,7 +116,7 @@ public class App {
         final String destPath = p_args[destStrId];
         final String sourcePath = p_args[sourceStrId];
 
-        final File destFile = new File(destPath);
+        File destFile = new File(destPath);
         final File sourceFile = new File(sourcePath);
 
         if (sourceFile.isDirectory()) {
@@ -124,9 +124,8 @@ public class App {
             App.exitWithCode(AppExitCode.SOURCE_FILE_IS_DIRECTORY);
         }
 
-        if (destFile.isDirectory()) {
-            // TODO Make sure name of copy is correct when `destFile` is a dir.
-        }
+        if (destFile.isDirectory())
+            destFile = new File(destFile, sourceFile.getName());
 
         if (destFile.exists() && getPermissionForOverwrites) {
             System.out.printf("DEST file `%s` already exists. Overwrite? [Y/n]: ", destPath);
@@ -149,7 +148,6 @@ public class App {
         try (final var is = new FileInputStream(sourceFile)) {
 
             try (final var os = new FileOutputStream(destFile)) {
-
                 int bytesRead;
                 final byte[] buffer = new byte[4096];
 
@@ -157,11 +155,15 @@ public class App {
                     os.write(buffer, 0, bytesRead);
                     os.flush();
                 }
-
             } catch (final SecurityException e) {
-                // TODO Use `if (!destFile.getParentFile().canWrite())` instead?
-                // What if it's the parent that you can't write to?!
-                System.out.println("Program JVM not currently permitted to write files.");
+                if (!destFile.getParentFile().canWrite())
+                    System.out.printf(
+                            "Program JVM not currently permitted to write to DEST's parent, `%s`.%n",
+                            destFile.getParentFile().getAbsolutePath());
+                else
+                    System.out.printf(
+                            "Program JVM not currently permitted to write DEST file `%s`.%n",
+                            destFile.getAbsolutePath());
                 App.exitWithCode(AppExitCode.WRITING_NOT_ALLOWED);
             } catch (final IOException e) {
                 System.out.printf("DEST file `%s` could not be created. Is there enough space?%n", destPath);
@@ -169,7 +171,14 @@ public class App {
             }
 
         } catch (final SecurityException e) {
-            System.out.println("Program JVM not currently permitted to read files.");
+            if (!sourceFile.getParentFile().canRead())
+                System.out.printf(
+                        "Program JVM not currently permitted to read SOURCE's parent, `%s`.%n",
+                        sourceFile.getParentFile().getAbsolutePath());
+            else
+                System.out.printf(
+                        "Program JVM not currently permitted to read SOURCE file `%s`.%n",
+                        sourceFile.getAbsolutePath());
             App.exitWithCode(AppExitCode.READING_NOT_ALLOWED);
         } catch (final IOException e) {
             System.out.printf("SOURCE file `%s` could not be fetched. Does it exist?%n", sourcePath);
