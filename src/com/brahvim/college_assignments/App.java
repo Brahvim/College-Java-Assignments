@@ -124,15 +124,9 @@ public class App {
             App.exitWithCode(AppExitCode.SOURCE_NOT_FETCHED);
         }
 
-        if (sourceFile.isDirectory()) {
-            System.out.println("Path `%s` provided for SOURCE points to a directory and not a file. Exiting.");
-            App.exitWithCode(AppExitCode.SOURCE_FILE_IS_DIRECTORY);
-        }
-
         if (destFile.isDirectory())
             destFile = new File(destFile, sourceFile.getName());
 
-        // Path existence checks right here:
         if (destFile.exists() && getPermissionForOverwrites) {
             System.out.printf("DEST file `%s` already exists. Overwrite? [Y/n]: ", destPath);
 
