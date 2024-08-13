@@ -32,13 +32,19 @@ public class App {
 		final long wordCount, lineCount, charCount;
 		final File file = new File(filePath);
 
-		// Do you prefer this?
-		try (Reader fr = new FileReader(file); BufferedReader br = new BufferedReader(fr);) {
+		// ...Or do you prefer this?!:
+		try (
+
+				Reader fr = new FileReader(file);
+				BufferedReader br = new BufferedReader(fr);
+
+		) {
 		} catch (final IOException e) {
 			System.out.println("Could not read file. Does it exist?");
 		} catch (final SecurityException e) {
 			System.out.printf("Program JVM not permitted to read FILE at `%s`%n", filePath);
 		}
+		// (Read previous commit!)
 
 	}
 
