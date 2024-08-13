@@ -23,7 +23,7 @@ public class App {
         // region The class part
         public final int exitCode;
 
-        static class AppExitCodeEnumCounter {
+        private static class AppExitCodeEnumCounter {
 
             private AppExitCodeEnumCounter() {
 
@@ -119,6 +119,11 @@ public class App {
         File destFile = new File(destPath);
         final File sourceFile = new File(sourcePath);
 
+        if (!sourceFile.exists()) {
+            App.showHelp();
+            App.exitWithCode(AppExitCode.SOURCE_NOT_FETCHED);
+        }
+
         if (sourceFile.isDirectory()) {
             System.out.println("Path `%s` provided for SOURCE points to a directory and not a file. Exiting.");
             App.exitWithCode(AppExitCode.SOURCE_FILE_IS_DIRECTORY);
@@ -127,6 +132,7 @@ public class App {
         if (destFile.isDirectory())
             destFile = new File(destFile, sourceFile.getName());
 
+        // Path existence checks right here:
         if (destFile.exists() && getPermissionForOverwrites) {
             System.out.printf("DEST file `%s` already exists. Overwrite? [Y/n]: ", destPath);
 
