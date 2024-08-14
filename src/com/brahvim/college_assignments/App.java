@@ -47,6 +47,7 @@ public class App {
 
 				++lineCount; // New line, ain't it?
 				charCount += length;
+				++charCount; // Accounting for the `\n`!
 
 				if (length != 0) // If there's any content,
 					++wordCount; // ...there's always at least one word on the line.
@@ -66,12 +67,9 @@ public class App {
 		} catch (final SecurityException e) {
 			System.out.printf("Program JVM not permitted to read FILE at `%s`%n", filePath);
 		}
-		// (Read previous commit!)
 
-		// There's always at least a `\n`!... Account for it!:
-		charCount += lineCount - 1;
-		// Best alternative to incrementing `charCount` in-loop,
-		// then have an `if (charCount != -1)` branch.
+		if (lineCount != 0)
+			--charCount;
 
 		System.out.printf("Line count: `%d`.%n", lineCount);
 		System.out.printf("Word count: `%d`.%n", wordCount);
