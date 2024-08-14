@@ -7,11 +7,26 @@ public class ArraysExercise1 {
 		throw new IllegalAccessError(); // `Error`s in Java cannot be caught or *somehow* recovered from!
 	}
 
-	public static void main() {
+	public static void main(final String[] p_args) {
 		// Arrays can be declared in both Java's more data-type reliant and C++ styles:
 
 		@SuppressWarnings("unused") // (This is a Java "annotation". **Feel free to ignore!**)
 		final int[] javaStyle;
+		// This is the preferred style for Java arrays.
+
+		// When using the *generics* feature of Java,
+		// you'll see that arrays are in fact, also a data type.
+
+		// ...Just like how the preference for the `*` of a pointer is always on the
+		// side of the variable in all languages that have them, the "Java style"
+		// should serve as a good reminder.
+
+		// Yes, generics were introduced in the language *much later*, but the purpose
+		// of this style was to *look cleaner*, which the C/C++ one doesn't exactly do.
+
+		// The C/C++ style was included in Java so it was easier for programmers to
+		// switch from C++. Of course, it's not as easy for beginners to interpret.
+		// ...Though, even actual programmers can sometimes miss the square brackets!
 
 		@SuppressWarnings("unused")
 		final int cAndCppStyle[]; // NOSONAR <- Starting a comment with this shuts my "linter".
