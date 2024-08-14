@@ -29,16 +29,38 @@ public class App {
 		final String filePath = sc.nextLine();
 		sc.close();
 
-		final long wordCount, lineCount, charCount;
 		final File file = new File(filePath);
+		long lineCount = 0, wordCount = 0, charCount = 0;
 
-		// ...Or do you prefer this?!:
+		// I guess I'm starting to prefer formatting like QtCreator!...
+		// (They like their commas on the next line so you can delete-off function
+		// parameters quick!)
 		try (
 
 				Reader fr = new FileReader(file);
-				BufferedReader br = new BufferedReader(fr);
+				BufferedReader br = new BufferedReader(fr)
 
 		) {
+			while (br.ready()) {
+				final String line = br.readLine();
+				final long length = line.length();
+
+				++lineCount; // New line, ain't it?
+				charCount += length;
+
+				if (length != 0) // If there's any content,
+					++wordCount; // ...there's always at least one word on the line.
+
+				final char[] chars = line.toCharArray(); // Hopefully more vectorizable.
+				for (final char c : chars)
+					// No QtCreator-styled formatting here.
+					// VSCode for Java makes it look weird...
+					if (c == ' ' || c == '\t')
+						++wordCount;
+
+				// A space is two words joined together!
+				// That's the number of whitespace characters plus one!
+			}
 		} catch (final IOException e) {
 			System.out.println("Could not read file. Does it exist?");
 		} catch (final SecurityException e) {
@@ -46,6 +68,14 @@ public class App {
 		}
 		// (Read previous commit!)
 
+		// There's always at least a `\n`!... Account for it!:
+		charCount += lineCount - 1;
+		// Best alternative to incrementing `charCount` in-loop,
+		// then have an `if (charCount != -1)` branch.
+
+		System.out.printf("Line count: `%d`.%n", lineCount);
+		System.out.printf("Word count: `%d`.%n", wordCount);
+		System.out.printf("Character count: `%d`.%n", charCount);
 	}
 
 }
