@@ -1,9 +1,9 @@
 package com.brahvim.college_assignments.arrays;
 
-public class ArraysExercise1 {
+public class ArrayDeclarationStyles {
 
 	// Empty, `private`, "null" constructor so nobody constructs from this class:
-	private ArraysExercise1() {
+	private ArrayDeclarationStyles() {
 		throw new IllegalAccessError(); // `Error`s in Java cannot be caught or *somehow* recovered from!
 	}
 
