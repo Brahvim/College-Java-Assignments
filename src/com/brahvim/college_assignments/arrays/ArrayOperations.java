@@ -64,7 +64,24 @@ public class ArrayOperations {
 
 		// Primitive data-types are copied by value, even if boxed (I think).
 
-		// For objects, this means:
+		// Think of it like this - if you call `malloc()` or `new` to create space to
+		// store data in C/C++ code, you get a pointer to the block of memory produced.
+
+		// Let's say that this space stores an object. ...Or `struct` instance.
+		// This pointer is exactly what Java objects are like. Pointers. Ordinary ones.
+		// Ones that are the same size in bytes as the word-size of the CPU architecture
+		// your program will run on. i386 / x86, 32-bit CPUs have a word-size of 4
+		// bytes, while amd64 / x86-64, 64-bit ones have a word-size of 8 bytes.
+
+		// Let's say that you took this exact same pointer, which is just a number,
+		// remember! It's a "value type"! It's value is copied over when you assign it
+		// to something! Even if that "something" is a pointer of the same type.
+		// (Just... not a pointer to a pointer of the type I mention.)
+
+		// When you do that, the pointer the new place will still refer to the exact
+		// same place in memory. You can change it from either place now.
+
+		// java objects behave like this when you do that:
 		// - If the object at `firstArray[0]` changes, the copy will show those changes.
 		//
 		// - If `firstArray[0]` suddenly holds a different object or `null`,
@@ -208,6 +225,36 @@ public class ArrayOperations {
 		// serialization feature to C and C++. However, Protobuf supports more
 		// standardized formats like JSON. Java serialization as of the JDK 21 LTS era,
 		// does not.)
+
+		// Right - back to array operations.
+
+		// So, arrays can be copied in one more way - a way that can sometimes have
+		// ambiguity over how the copy is actually done. It's by calling the `clone()`
+		// method:
+		@SuppressWarnings("unused")
+		final int[] lastArray = anotherArray.clone();
+
+		// This yet again asks the JVM to clone the object (or array, in this case
+		// though this should remind that all non-primitive data types in Java are
+		// objects!).
+
+		// The copy is made quicker than it could be via our own Java code if it's
+		// actually done by the JVM. Read the official docs!
+
+		// All methods in `java.lang.Object` are overridable if you're writing a class
+		// that does not inherit from another - because a class can declare these as
+		// `final` and disallow you from overriding any further.
+
+		// This is another reason why hash-codes might surprise you - because
+		// `Object::hashCode()` could've been overridden by your super-class.
+
+		// Same goes for `Object::clone()`!
+		// What if a class overrides and makes it as short as... `return this;`?!
+		// (That wouldn't be a "clone", would it? That'd be the same object!
+		// The same pointer!)
+
+		// However, this can be beneficial for `Object::toString()` - you could make
+		// your objects' data more readable.
 	}
 
 }
