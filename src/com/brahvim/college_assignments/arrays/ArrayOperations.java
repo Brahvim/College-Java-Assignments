@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class ArrayOperations {
 
+	// I sure hope you read `ArrayDeclarationStyles.java` first!
+
 	private ArrayOperations() {
 		throw new IllegalAccessError();
 	}

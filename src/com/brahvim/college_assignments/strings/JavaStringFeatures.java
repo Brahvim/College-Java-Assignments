@@ -1,8 +1,8 @@
 package com.brahvim.college_assignments.strings;
 
-public class JavaStringsFeatures {
+public class JavaStringFeatures {
 
-	private JavaStringsFeatures() {
+	private JavaStringFeatures() {
 		throw new IllegalAccessError();
 	}
 
@@ -47,12 +47,12 @@ public class JavaStringsFeatures {
 		// You can't do this with numbers *even if* they are in parenthesis, sorry.
 		// I mean to say, that `byte a = (5).byteValue();` won't work.
 
-		// `String`s have hash-codes too!:
+		// Strings, like any other object, have hash-codes too!:
 
 		@SuppressWarnings("unused")
 		final int nameHash = "Brahvim".hashCode();
 
-		// In fact, the hashing function for Java `String`s has a chance of collision
+		// In fact, the hashing function for Java strings has a chance of collision
 		// low enough for the Java Language Specification ("JLS") to consider this crazy
 		// feature for `switch`-case blocks!:
 
@@ -76,7 +76,7 @@ public class JavaStringsFeatures {
 					break;
 			}
 
-		// Yep! Java allows you to put `String`s in `switch`-`case` blocks too!
+		// Yep! Java allows you to put strings in `switch`-`case` blocks too!
 		// ...DON'T WRITE THAT ON THE EXAM! They might not even know of the feature yet!
 
 		// Anyway, I think that feature has been here since JDK 11. 8 even? Who knows!
@@ -106,7 +106,7 @@ public class JavaStringsFeatures {
 		// In C/C+, macros can be many lines long.
 		// This is done by using a backslash at the end of the line.
 
-		// Java multi-line `String`s provide a similar feature:
+		// Java multi-line strings provide a similar feature:
 		System.out.println("""
 				PS This string is \
 				going to be on the same line. \
@@ -119,18 +119,22 @@ public class JavaStringsFeatures {
 		// And that should be a bunch about the syntax for one file. I've crossed a
 		// `100` lines already.
 
-		// PS Multi-line strings are still objects (OF COURSE THEY ARE!) if you were
+		// PS Multi-line strings can have quotes in them without needing to "escape"
+		// them with a `\`.
+
+		// Also, they **still** are objects (OF COURSE THEY ARE!), if you were
 		// unable to grasp that concept from earlier well-enough:
 		System.out.println(
 
 				/* NOSONAR! */ """
 						This is indeed an object.
-						And now I'll leave trailing spaaaceeeess!:		""".strip()
+						PS Multi-line strings can freely use quotes! (These guys!: `" "`!!!)
+						...And now I'll leave trailing spaaaceeeess!:		""".strip()
 
 		);
 
 		// ^^^ (That, shows off the `String::strip()` method too.)
-		// (I'll talk about `String` methods next.)
+		// (I'll talk about `String` class's methods next.)
 		// (See you there!)
 	}
 
