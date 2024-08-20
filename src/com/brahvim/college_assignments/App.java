@@ -10,7 +10,7 @@ public class App {
 	public static void main(final String[] p_args) {
 		final Car car = new Car();
 
-		try (ObjModelLoader loader = new ObjModelLoader("./car-model.obj")) {
+		try (final ObjModelLoader loader = new ObjModelLoader("./res/models/car-model.obj")) {
 			car.setModel(loader.load());
 		} catch (final IOException e) {
 			e.printStackTrace();
