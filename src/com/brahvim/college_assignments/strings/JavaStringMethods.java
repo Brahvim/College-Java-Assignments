@@ -170,9 +170,8 @@ public class JavaStringMethods {
 		// Now, `String::compareTo()` returns an **`int`**. This is because it has three
 		// statuses to report:
 		// - The strings being equal (`0`),
-		// - The string you pass
-		// - The strings being equal (`0`),
-
+		// - Passed string being "lesser" than callee (less than `0`; negative),
+		// - Callee string being "lesser" than the one passed (more than `0`; positive).
 	}
 
 }
