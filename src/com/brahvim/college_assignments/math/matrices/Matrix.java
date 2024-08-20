@@ -1,5 +1,12 @@
 package com.brahvim.college_assignments.math.matrices;
 
-public interface Matrix {
+public abstract class Matrix {
+
+	protected float[] data;
+	protected int numValues;
+
+	protected Matrix() {
+
+	}
 
 }

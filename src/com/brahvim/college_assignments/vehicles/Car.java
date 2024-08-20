@@ -4,9 +4,9 @@ import com.brahvim.college_assignments.math.vectors.Vector3;
 
 public class Car extends Vehicle {
 
-    public Car() {
-        super.wheelCount = 4;
-        super.position = new Vector3();
-    }
+	public Car() {
+		super.wheelCount = 4;
+		super.position = new Vector3();
+	}
 
 }

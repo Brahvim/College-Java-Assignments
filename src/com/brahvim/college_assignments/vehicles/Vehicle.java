@@ -4,18 +4,18 @@ import com.brahvim.college_assignments.math.vectors.Vector3;
 
 public abstract class Vehicle {
 
-    protected int wheelCount;
-    protected Vector3 position;
+	protected int wheelCount;
+	protected Vector3 position;
 
-    protected Vehicle() {
-    }
+	protected Vehicle() {
+	}
 
-    public int getWheelCount() {
-        return this.wheelCount;
-    }
+	public int getWheelCount() {
+		return this.wheelCount;
+	}
 
-    public Vector3 getPosition() {
-        return this.position;
-    }
+	public Vector3 getPosition() {
+		return this.position;
+	}
 
 }
