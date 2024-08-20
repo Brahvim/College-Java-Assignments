@@ -8,7 +8,7 @@ public class App {
 		// ...Mostly the syntax I'll be using, haha.
 
 		// The most naive way to make threads is to write a class that extends `Thread`:
-		class ThreadingMethod1 extends Thread {
+		class Thread1 extends Thread {
 
 			// And override the `Thread::run()` method:
 			@Override
@@ -45,26 +45,22 @@ public class App {
 			// Okay, I'll put the rest of the class here:
 			final String className = this.getClass().getSimpleName();
 
-			private ThreadingMethod1() {
+			private Thread1() {
 				super.setName(this.className);
 			}
 
 			// Ignore my use of var-args here :>
 			private void log(final Object... p_objects) {
 				for (final Object o : p_objects) {
-					System.out.println(
-
-							"[" + this.className + "]"
-									+ o.toString()
-
-					);
+					System.out.print("[" + this.className + "]");
+					System.out.print(' ');
+					System.out.println(o.toString());
 				}
 			}
 
 		}
 
-		new ThreadingMethod1()
-				.start();
+		new Thread1().start();
 
 		// And Java has "syntax sugar" for that:
 		new Thread() {
@@ -92,7 +88,7 @@ public class App {
 
 		new Thread(thread3Runnable).start();
 
-		// But you can make this even shorter!
+		// But you can make this code even shorter because of THE SPECIFIC CASE!
 		// Java has this syntax:
 
 		final Runnable thread4Runnable = () -> {
@@ -119,10 +115,50 @@ public class App {
 		// and thus **a `Runnable` too is just an object with a single method,
 		// `Runnable::run()`**.
 
-		// A `Runnable` essentially lets you a function w/o parameters.
-		// A `Consumer` function has one
+		// Now, knowing that they are actually objects, you can now start to learn that:
+		// A `Runnable` essentially lets you make a function w/o parameters,
+		// A `Consumer` function has one parameter,
+		// A `Supplier` function returns one value, but has no parameter,
+		// A `Function` has both one input and an output.
+		// A `Predicate` is a function w/ one parameter *intended to be* `if`-statement.
+
+		// The `Bi*` versions of course indicate a change from "one" to "two" in *all*
+		// of the previous statements. *Don't change the "a"s or "an"s or others!*
 
 		new Thread(thread4Runnable).start();
+
+		// ...Aaand of course, here's the version I like to use. Prepare for brackets!:
+		new Thread(() -> System.out.println("thread 5 chillin' in 1 line. yo.")).start();
+
+		// A bit more on lambdas by the way - you can do this!:
+
+		@FunctionalInterface // You can... define your own functional interface!
+		interface Adder {
+
+			int addThemNumbers(int a, int b);
+
+		}
+
+		// ...And make an object out of it:
+		final Adder ohGodNobodyWillReadThis = (a, b) -> a + b; // **No brackets required for a single statement!**
+		System.out.println(ohGodNobodyWillReadThis.addThemNumbers(0, 1));
+
+		// There's a "fun" way to do this:
+
+		final var funWayToDoDis = (Adder) (a, b) -> a + b; // ...Using a cast, yeah. Trust me, I've used this in Nerd.
+		System.out.println(funWayToDoDis.addThemNumbers(1, 0)); // ...somewhere. Maybe I removed it later.
+
+		class a {
+
+			void b() {
+			}
+
+		}
+
+		final a e = () -> System.out.println("");
+
+		// PS You can use classes too - interfaces look cleaner is why people make 'em:
+		final Thread theLastThreadObject = () -> System.out.println("Thread 1 is now a1ive. N0w c00l3r th4n b4.");
 	}
 
 }
