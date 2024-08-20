@@ -1,6 +1,6 @@
-package com.brahvim.college_assignments.vectors;
+package com.brahvim.college_assignments.math.vectors;
 
-public class Vector2 implements Vector {
+public class Vector2 extends Vector {
 
     protected float x, y;
 

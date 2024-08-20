@@ -1,6 +1,6 @@
 package com.brahvim.college_assignments.vehicles;
 
-import com.brahvim.college_assignments.vectors.Vector3;
+import com.brahvim.college_assignments.math.vectors.Vector3;
 
 public abstract class Vehicle {
 

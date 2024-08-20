@@ -1,4 +1,4 @@
-package com.brahvim.college_assignments.vectors;
+package com.brahvim.college_assignments.math.vectors;
 
 public class Vector3 extends Vector2 {
 
