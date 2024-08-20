@@ -9,11 +9,11 @@ public class ObjModelLoader extends ModelLoader {
 
     private static final String EXTENSION = "obj";
 
-    public ObjModelLoader(final String p_filePath) throws IOException, ModelFormatException {
+    public ObjModelLoader(final String p_filePath) throws IOException {
         this(new File(p_filePath));
     }
 
-    public ObjModelLoader(final File p_file) throws ModelFormatException, IOException {
+    public ObjModelLoader(final File p_file) throws IOException {
         super(p_file);
 
         final String path = p_file.getPath();
@@ -25,7 +25,7 @@ public class ObjModelLoader extends ModelLoader {
 
     @Override
     public Model load() {
-        throw new UnsupportedOperationException("Unimplemented method 'load'");
+        return new Model(new float[0]);
     }
 
     @Override

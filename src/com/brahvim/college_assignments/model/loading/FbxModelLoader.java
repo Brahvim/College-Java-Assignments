@@ -9,11 +9,11 @@ public class FbxModelLoader extends ModelLoader {
 
     public static final String EXTENSION = "fbx";
 
-    public FbxModelLoader(final String p_filePath) throws IOException, ModelFormatException {
+    public FbxModelLoader(final String p_filePath) throws IOException {
         this(new File(p_filePath));
     }
 
-    public FbxModelLoader(final File p_file) throws ModelFormatException, IOException {
+    public FbxModelLoader(final File p_file) throws IOException {
         super(p_file);
 
         final String path = p_file.getPath();

@@ -1,6 +1,8 @@
 package com.brahvim.college_assignments.model.loading;
 
-public class ModelFormatException extends Exception {
+import java.io.IOException;
+
+public class ModelFormatException extends IOException {
 
     public ModelFormatException(final String p_filePath) {
         super(String.format(
