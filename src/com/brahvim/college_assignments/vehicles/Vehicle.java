@@ -1,17 +1,21 @@
 package com.brahvim.college_assignments.vehicles;
 
-import java.util.Vector;
+import com.brahvim.college_assignments.vectors.Vector3;
 
 public abstract class Vehicle {
 
-    private int wheelCount;
-    private Vector position;
+    protected int wheelCount;
+    protected Vector3 position;
 
-    private Vehicle() {
+    protected Vehicle() {
     }
 
     public int getWheelCount() {
         return this.wheelCount;
+    }
+
+    public Vector3 getPosition() {
+        return this.position;
     }
 
 }
