@@ -149,6 +149,8 @@ public class App {
 		System.out.println(funWayToDoDis.addThemNumbers(1, 0)); // ...somewhere. Maybe I removed it later.
 		System.out.println("Bye! (...said the `main` thread, named by all OpenJDK JVMs, the same!)");
 		// (Actually, it's the Java standard. **It's not just OpenJDK! It's ALL JVMs!**)
+
+		// Okay, *me is not covering threading factz, baaaiii!* :D
 	}
 
 }
