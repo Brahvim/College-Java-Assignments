@@ -148,15 +148,6 @@ public class App {
 		final var funWayToDoDis = (Adder) (a, b) -> a + b; // ...Using a cast, yeah. Trust me, I've used this in Nerd.
 		System.out.println(funWayToDoDis.addThemNumbers(1, 0)); // ...somewhere. Maybe I removed it later.
 
-		class a {
-
-			void b() {
-			}
-
-		}
-
-		final a e = () -> System.out.println("");
-
 		// PS You can use classes too - interfaces look cleaner is why people make 'em:
 		final Thread theLastThreadObject = () -> System.out.println("Thread 1 is now a1ive. N0w c00l3r th4n b4.");
 	}
