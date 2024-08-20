@@ -1,11 +1,11 @@
 package com.brahvim.college_assignments.vehicles;
 
-import com.brahvim.college_assignments.math.vectors.Vector3;
+import com.brahvim.college_assignments.math.matrices.ModelSpaceMatrix;
 
 public abstract class Vehicle {
 
 	protected int wheelCount;
-	protected Vector3 position;
+	protected ModelSpaceMatrix transform;
 
 	protected Vehicle() {
 	}
@@ -14,8 +14,8 @@ public abstract class Vehicle {
 		return this.wheelCount;
 	}
 
-	public Vector3 getPosition() {
-		return this.position;
+	public ModelSpaceMatrix getTransform() {
+		return this.transform;
 	}
 
 }
