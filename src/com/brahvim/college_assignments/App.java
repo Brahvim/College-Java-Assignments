@@ -17,7 +17,8 @@ public class App {
 		DB(),
 		HOST(),
 		PASS(),
-		PORT();
+		PORT(),
+		DRIVER();
 
 	}
 
@@ -53,11 +54,19 @@ public class App {
 		// First, we derive the URL to send HTTPS requests to:
 		try {
 
-			// DriverManager.get
+			final String dbUrl = String.format(
+
+					"jdbc:mariadb://localhost:%s/%s",
+					p_config.get(ConfigFileEntry.PORT.toString()),
+					p_config.get(ConfigFileEntry.DB.toString())
+
+			);
+
+			System.out.println(dbUrl);
 
 			return DriverManager.getConnection(
 
-					"jdbc:mariadb://localhost:" + 3306 + "/" + p_config.get(ConfigFileEntry.DB.toString()),
+					dbUrl,
 					p_config.get(ConfigFileEntry.HOST.toString()),
 					p_config.get(ConfigFileEntry.PASS.toString())
 
@@ -66,6 +75,8 @@ public class App {
 		} catch (final SQLException e) {
 			e.printStackTrace();
 		}
+
+		return null;
 	}
 
 	/** @return A {@code String[]} with names of missing entries in uppercase. */
