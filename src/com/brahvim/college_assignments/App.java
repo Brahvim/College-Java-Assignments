@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.function.UnaryOperator;
+import java.util.Set;
 
 public class App {
 
@@ -30,17 +30,14 @@ public class App {
 		CHECK_CONF("-c");
 
 		// region Class stuff.
-		private static final UnaryOperator<Map<String, AppFlag>> APP_FLAG_INTERNAL_MAP_FILLER = m -> {
-			for (final var e : AppFlag.values())
-				m.put(e.getIdentifier(), e);
-
-			return m;
-		};
-
-		private static final Map<String, AppFlag> IDENTIFIERS_MAP = AppFlag.APP_FLAG_INTERNAL_MAP_FILLER
-				.apply(new HashMap<>(AppFlag.values().length));
+		private static final Map<String, AppFlag> IDENTIFIERS_MAP = new HashMap<>(AppFlag.values().length);
 
 		private final String identifier;
+
+		static {
+			for (final var e : AppFlag.values())
+				AppFlag.IDENTIFIERS_MAP.put(e.getIdentifier(), e);
+		}
 
 		private AppFlag(final String p_identifier) {
 			this.identifier = p_identifier;
@@ -59,7 +56,17 @@ public class App {
 
 	public enum AppExitCode {
 
-		UNKNOWN_FLAG_PASSED();
+		OKAY(0),
+		UNKNOWN_FLAG_PASSED(1); // <- I hated this idea till I realized that VERSIONING APPS is a thing!
+		// (NEW VERSIONS may come with NEW FLAGS!)
+
+		// region Class stuff.
+		private final int exitCode;
+
+		private AppExitCode(final int p_exitCode) {
+			this.exitCode = p_exitCode;
+		}
+		// endregion
 
 	}
 
@@ -81,10 +88,17 @@ public class App {
 
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
-		final ArrayList<String> flags = new ArrayList<>(AppFlag.values().length);
+		final Set<AppFlag> flags = new HashSet<>(AppFlag.values().length);
 		final Map<String, String> config = new HashMap<>(AppConfigEntry.values().length);
 
-		for (final AppFlag f : flags) {
+		// Add flags in:
+		for (final var s : p_args) {
+			final AppFlag f = AppFlag.identifierToFlag(s);
+
+			if (f == null)
+				continue;
+
+			flags.add(f);
 		}
 
 		App.readConfigFile(config);
@@ -106,7 +120,7 @@ public class App {
 
 			final Scanner sc = new Scanner(System.in);
 
-			for (final Map.Entry<String, String> e : p_config.entrySet()) {
+			for (final Map.Entry<String, String> e : p_config.entrySet()) { // ALWAYS use `var`! I adapted this late...
 				if (!"".equals(e.getValue())) // Why is `""` first? `NullPointerException`s!
 					continue;
 
