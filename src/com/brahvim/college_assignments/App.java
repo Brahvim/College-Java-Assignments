@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -95,7 +96,7 @@ public class App {
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
 		final Set<AppFlag> flags = new HashSet<>(AppFlag.values().length);
-		final Map<AppConfigEntry, String> configuration = new HashMap<>(AppConfigEntry.values().length);
+		final Map<AppConfigEntry, String> configuration = new EnumMap<>(AppConfigEntry.class);
 
 		// Add flags in:
 		for (final var s : p_args) {
@@ -107,10 +108,10 @@ public class App {
 			flags.add(f);
 		}
 
-		for (final var f : flags)
-			switch (f) {
-
-			}
+		// for (final var f : flags)
+		// switch (f) {
+		//
+		// }
 
 		App.readConfigFile(configuration);
 
@@ -120,19 +121,41 @@ public class App {
 		// Now we'll establish a connection with the DB:
 		try (final Connection connection = App.ensureConnection(configuration)) {
 
-			System.out.println("Connected! Please go on:");
+			System.out.println("Connected! Please go on:\n");
+
+			final StringBuilder fullStatementStringBuilder = new StringBuilder();
+			final String statementBegin = String.format(
+
+					"%s [%s])> ",
+					configuration.get(AppConfigEntry.DRIVER),
+					configuration.get(AppConfigEntry.DB)
+
+			);
 
 			final Scanner sc = new Scanner(System.in);
-			while (App.interactiveModeIteration(sc, flags, connection, configuration))
-				;
+			System.out.print(statementBegin);
+
+			while (sc.hasNextLine()) {
+				final String line = sc.nextLine();
+				fullStatementStringBuilder.append(line);
+
+				// Using these instead of `String::endsWith()` for performance:
+				if (';' == line.charAt(line.length() - 1))
+					break;
+
+				fullStatementStringBuilder.append(' ');
+				System.out.print("-> ");
+			}
 
 			sc.close();
+			System.out.println();
+			App.runQueryForConnection(fullStatementStringBuilder.toString(), connection);
 
-		} catch (final SQLException e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
-		System.out.println("\nBye!");
+		System.out.println("\nBye! ^-^");
 		App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
 	}
 
@@ -194,6 +217,9 @@ public class App {
 				p_config.put(e, sc.nextLine());
 			}
 
+			sc.close(); // :(
+			// This was supposed to be needed again for interactive CLI program...
+
 			final String
 			/*	 */ db = p_config.get(AppConfigEntry.DB),
 					host = p_config.get(AppConfigEntry.HOST),
@@ -201,9 +227,6 @@ public class App {
 					pass = p_config.get(AppConfigEntry.PASS),
 					user = p_config.get(AppConfigEntry.USER),
 					driver = p_config.get(AppConfigEntry.DRIVER);
-
-			sc.close(); // :(
-			// This was supposed to be needed again for interactive CLI program...
 
 			// First, we derive the URL to send HTTPS requests to:
 			final String urlString = String.format(
@@ -226,39 +249,11 @@ public class App {
 		return null;
 	}
 
-	/** @return Whether or not any inputs were read. */
-	public static boolean interactiveModeIteration(
-			final Scanner p_scanner,
-			final Set<AppFlag> p_flags,
-			final Connection p_connection,
-			final Map<AppConfigEntry, String> p_config) {
-
-		final StringBuilder fullStatementStringBuilder = new StringBuilder();
-		final String statementBegin = "[" + p_config.get(AppConfigEntry.DRIVER) + "])> ";
-
-		System.out.print(statementBegin);
-
-		if (!p_scanner.hasNextLine())
-			return false;
-
-		while (true) {
-			final String line = p_scanner.nextLine();
-
-			fullStatementStringBuilder
-					.append(line)
-					.append(' ');
-
-			// Using these instead of `String::endsWith()` for performance:
-			if (';' == line.charAt(line.length() - 1))
-				break;
-
-			System.out.print("-> ");
-		}
-
+	public static void runQueryForConnection(final String p_query, final Connection p_connection) {
 		try (
 
 				final Statement statement = p_connection.createStatement();
-				final ResultSet result = statement.executeQuery(fullStatementStringBuilder.toString());
+				final ResultSet result = statement.executeQuery(p_query);
 
 		) {
 
@@ -288,8 +283,6 @@ public class App {
 				e = e.getNextException();
 			}
 		}
-
-		return true;
 	}
 
 }
