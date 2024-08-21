@@ -18,6 +18,7 @@ public class App {
 		HOST(),
 		PASS(),
 		PORT(),
+		USER(),
 		DRIVER();
 
 	}
@@ -43,59 +44,64 @@ public class App {
 		final Map<String, String> config = new HashMap<>(4);
 		App.readConfigFile(config);
 
-		final String[] missingConfigEntries = App.checkConfig(config);
-		App.promptConfigCompletion(missingConfigEntries, config);
-
 		// Now we'll establish a connection with the DB:
 		final Connection connection = App.connect(config);
 	}
 
 	public static Connection connect(final Map<String, String> p_config) {
-		// First, we derive the URL to send HTTPS requests to:
 		try {
 
-			final String dbUrl = String.format(
+			final String
+			/*	 */ db = p_config.get(ConfigFileEntry.DB.toString()),
+					host = p_config.get(ConfigFileEntry.HOST.toString()),
+					port = p_config.get(ConfigFileEntry.PORT.toString()),
+					pass = p_config.get(ConfigFileEntry.PASS.toString()),
+					user = p_config.get(ConfigFileEntry.USER.toString()),
+					driver = p_config.get(ConfigFileEntry.DRIVER.toString());
 
-					"jdbc:mariadb://localhost:%s/%s",
-					p_config.get(ConfigFileEntry.PORT.toString()),
-					p_config.get(ConfigFileEntry.DB.toString())
+			final Scanner sc = new Scanner(System.in);
+
+			for (final Map.Entry<String, String> e : p_config.entrySet()) {
+				if (e.getValue() != "")
+					continue;
+
+				System.out.printf(
+
+						"Did not find an entry for `%s` in the config file. Please provide it ",
+						e.getKey()
+
+				);
+
+				System.out.printf(
+
+						"(Possible values: [ %s ]): "
+
+				);
+
+				e.setValue(sc.nextLine());
+			}
+
+			sc.close();
+
+			// First, we derive the URL to send HTTPS requests to:
+			final String urlString = String.format(
+
+					"jdbc:%s://%s:%s/%s",
+					driver,
+					host,
+					port,
+					db
 
 			);
 
-			System.out.println(dbUrl);
-
-			return DriverManager.getConnection(
-
-					dbUrl,
-					p_config.get(ConfigFileEntry.HOST.toString()),
-					p_config.get(ConfigFileEntry.PASS.toString())
-
-			);
+			System.out.printf("Connecting to `%s` server at: `%s`.%n", driver, urlString);
+			return DriverManager.getConnection(urlString, user, pass);
 
 		} catch (final SQLException e) {
 			e.printStackTrace();
 		}
 
 		return null;
-	}
-
-	/** @return A {@code String[]} with names of missing entries in uppercase. */
-	public static String[] checkConfig(final Map<String, String> p_config) {
-		final ConfigFileEntry[] allPossibleEntries = ConfigFileEntry.values();
-		final String[] toRet = new String[allPossibleEntries.length];
-
-		int i = 0;
-
-		for (final ConfigFileEntry e : allPossibleEntries) {
-			final String entryName = e.toString();
-
-			if (!p_config.containsKey(entryName)) {
-				toRet[i] = entryName;
-				++i;
-			}
-		}
-
-		return toRet;
 	}
 
 	/**
@@ -119,7 +125,7 @@ public class App {
 					continue;
 				}
 
-				final String value = line.substring(separatorId);
+				final String value = line.substring(separatorId + 1);
 				final String key = line.substring(0, separatorId);
 
 				p_config.put(key, value);
@@ -128,27 +134,6 @@ public class App {
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static void promptConfigCompletion(final String[] p_missings, final Map<String, String> p_config) {
-		int actualEntryCount = 0;
-
-		for (; actualEntryCount < p_missings.length; ++actualEntryCount)
-			if (p_missings[actualEntryCount] == null)
-				break;
-
-		// WAY less cost than making an entire new `Scanner`!:
-		if (actualEntryCount == 0)
-			return;
-
-		final Scanner sc = new Scanner(System.in);
-		while (actualEntryCount-- > 0) {
-			final String s = p_missings[actualEntryCount];
-			System.out.printf("Did not find an entry for `%s` in the config file. Please provide it: ", s);
-			p_config.put(s, sc.nextLine());
-		}
-
-		sc.close();
 	}
 
 }
