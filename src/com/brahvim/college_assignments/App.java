@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -66,6 +68,10 @@ public class App {
 		private AppExitCode(final int p_exitCode) {
 			this.exitCode = p_exitCode;
 		}
+
+		public int getExitCode() {
+			return this.exitCode;
+		}
 		// endregion
 
 	}
@@ -89,7 +95,7 @@ public class App {
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
 		final Set<AppFlag> flags = new HashSet<>(AppFlag.values().length);
-		final Map<String, String> config = new HashMap<>(AppConfigEntry.values().length);
+		final Map<String, String> configuration = new HashMap<>(AppConfigEntry.values().length);
 
 		// Add flags in:
 		for (final var s : p_args) {
@@ -101,10 +107,65 @@ public class App {
 			flags.add(f);
 		}
 
-		App.readConfigFile(config);
+		for (final var f : flags)
+			switch (f) {
+
+			}
+
+		App.readConfigFile(configuration);
+
+		if (flags.contains(AppFlag.CHECK_CONF))
+			System.exit(AppExitCode.OKAY.getExitCode());
 
 		// Now we'll establish a connection with the DB:
-		final Connection connection = App.ensureConnection(config);
+		try (final Connection connection = App.ensureConnection(configuration)) {
+
+			while (true)
+				App.interactiveModeIteration(flags, connection, configuration);
+
+		} catch (final SQLException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("\nBye!");
+		App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
+	}
+
+	public static void exitApp(final AppExitCode p_flag) {
+		System.exit(p_flag.getExitCode());
+	}
+
+	/**
+	 * Reads the config file and stores it in the given
+	 * {@linkplain Map Map&lt;String,String&gt;}.
+	 */
+	public static void readConfigFile(final Map<String, String> p_config) {
+		try (
+
+				final FileReader fileReader = new FileReader("./.env");
+				final BufferedReader reader = new BufferedReader(fileReader);
+
+		) {
+
+			for (int i = 0; reader.ready(); ++i) {
+				final String line = reader.readLine();
+				final int separatorId = line.indexOf('=');
+
+				if (separatorId == -1) {
+					System.out.printf("Line `%d`: Missing `=`.%n", i);
+					continue;
+				}
+
+				final String value = line.substring(separatorId + 1);
+				final String key = line.substring(0, separatorId);
+
+				p_config.put(key, value);
+			}
+
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public static Connection ensureConnection(final Map<String, String> p_config) {
@@ -121,7 +182,8 @@ public class App {
 			final Scanner sc = new Scanner(System.in);
 
 			for (final Map.Entry<String, String> e : p_config.entrySet()) { // ALWAYS use `var`! I adapted this late...
-				if (!"".equals(e.getValue())) // Why is `""` first? `NullPointerException`s!
+				final String value = e.getValue();
+				if (!(value == null || "".equals(value))) // Why is `""` first? `NullPointerException`s!
 					continue;
 
 				System.out.printf(
@@ -158,37 +220,51 @@ public class App {
 		return null;
 	}
 
-	/**
-	 * Reads the config file and stores it in the given
-	 * {@linkplain Map Map&lt;String,String&gt;}.
-	 */
-	public static void readConfigFile(final Map<String, String> p_config) {
+	public static void interactiveModeIteration(
+			final Set<AppFlag> p_flags,
+			final Connection p_connection,
+			final Map<String, String> p_config) {
+
+		final Scanner sc = new Scanner(System.in);
+		final StringBuilder fullStatementStringBuilder = new StringBuilder();
+
+		for (String line = null; sc.hasNextLine(); line = sc.nextLine()) {
+			// Using these instead of `String::endsWith()` for performance:
+
+			if (';' == line.charAt(line.length() - 1))
+				break;
+
+			fullStatementStringBuilder.append(line);
+		}
+
+		sc.close();
+
 		try (
 
-				final FileReader fileReader = new FileReader("./.env");
-				final BufferedReader reader = new BufferedReader(fileReader);
+				final Statement statement = p_connection.createStatement();
+				final ResultSet result = statement.executeQuery(fullStatementStringBuilder.toString());
 
 		) {
 
-			for (int i = 0; reader.ready(); ++i) {
-				final String line = reader.readLine();
-				final int separatorId = line.indexOf('=');
+		} catch (SQLException e) {
+			int i = 0; // Java arrays are limited to `Integer.MAX_VALUE`.
+			System.out.println("Errors occurred!:");
 
-				if (separatorId == -1) {
-					System.out.printf("Line `%d`: Missing `=`.%n", i);
-					continue;
-				}
+			while (e != null) {
+				System.out.printf("""
+						Error `%d`:
+						\tCode `%d`.
+						\tDB state:`%s`.
+						Error message: %s
+						""", // Reminder: Bringing the `"""` to the next line adds a line to the output.
+						// PS SonarLint suggested avoiding `\t` (UTF[-8] `u/0009`).
+						// `Tab`s are scaled according to environment variables!
+						i, e.getErrorCode(), e.getSQLState(), e.getMessage());
 
-				final String value = line.substring(separatorId + 1);
-				final String key = line.substring(0, separatorId);
-
-				p_config.put(key, value);
+				++i;
+				e = e.getNextException();
 			}
-
-		} catch (final IOException e) {
-			e.printStackTrace();
 		}
-
 	}
 
 }
