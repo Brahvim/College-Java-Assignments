@@ -51,6 +51,7 @@ public class App {
 		}
 
 		public static AppFlag identifierToFlag(final String p_identifier) {
+			return AppFlag.IDENTIFIERS_MAP.get(p_identifier);
 		}
 		// endregion
 
@@ -80,23 +81,10 @@ public class App {
 
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
-		final ArrayList<AppFlag> flags = new ArrayList<>(AppFlag.values().length);
+		final ArrayList<String> flags = new ArrayList<>(AppFlag.values().length);
 		final Map<String, String> config = new HashMap<>(AppConfigEntry.values().length);
 
-		for (final String s : p_args)
-			flags.add(AppFlag.IDENTIFIERS_MAP.get(s));
-
 		for (final AppFlag f : flags) {
-			final String s = f.getIdentifier();
-
-			switch (f) {
-
-				case AppFlag.APP_FLAG_INTERNAL_MAP_FILLER: {
-
-				}
-					break;
-
-			}
 		}
 
 		App.readConfigFile(config);
