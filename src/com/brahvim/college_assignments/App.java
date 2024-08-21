@@ -6,13 +6,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class App {
 
-	public enum ConfigFileEntry {
+	public enum AppConfigEntry {
 
 		DB(),
 		HOST(),
@@ -20,6 +21,18 @@ public class App {
 		PORT(),
 		USER(),
 		DRIVER();
+
+	}
+
+	public enum AppFlag {
+
+		CHECK_CONF(/* "-c" */);
+
+	}
+
+	public enum AppExitCode {
+
+		UNKNOWN_FLAG();
 
 	}
 
@@ -41,26 +54,26 @@ public class App {
 
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
-		final Map<String, String> config = new HashMap<>(4);
+		final ArrayList<AppFlag> flags = new ArrayList<>(AppFlag.values().length);
+		final Map<String, String> config = new HashMap<>(AppConfigEntry.values().length);
+
 		App.readConfigFile(config);
 
 		// Now we'll establish a connection with the DB:
-		final Connection connection = App.connect(config);
+		final Connection connection = App.ensureConnection(config);
+
 	}
 
-	public static Connection connect(final Map<String, String> p_config) {
+	public static Connection ensureConnection(final Map<String, String> p_config) {
 		try {
 
 			final String
-			/*	 */ db = p_config.get(ConfigFileEntry.DB.toString()),
-					host = p_config.get(ConfigFileEntry.HOST.toString()),
-					port = p_config.get(ConfigFileEntry.PORT.toString()),
-					pass = p_config.get(ConfigFileEntry.PASS.toString()),
-					user = p_config.get(ConfigFileEntry.USER.toString()),
-					driver = p_config.get(ConfigFileEntry.DRIVER.toString());
-
-			// HACK ALERT! We have the entry now, so we can remove it for now:
-			p_config.put(ConfigFileEntry.DB.toString(), null);
+			/*	 */ db = p_config.get(AppConfigEntry.DB.toString()),
+					host = p_config.get(AppConfigEntry.HOST.toString()),
+					port = p_config.get(AppConfigEntry.PORT.toString()),
+					pass = p_config.get(AppConfigEntry.PASS.toString()),
+					user = p_config.get(AppConfigEntry.USER.toString()),
+					driver = p_config.get(AppConfigEntry.DRIVER.toString());
 
 			final Scanner sc = new Scanner(System.in);
 
@@ -78,7 +91,8 @@ public class App {
 				e.setValue(sc.nextLine());
 			}
 
-			sc.close();
+			sc.close(); // :(
+			// This was supposed to be needed again for interactive CLI program...
 
 			// First, we derive the URL to send HTTPS requests to:
 			final String urlString = String.format(
