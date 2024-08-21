@@ -38,6 +38,15 @@ public class App {
 				// (Also `Object::wait()` + `Object::notify()` / `Object::notifyAll()` is ALWAYS
 				// a better way to wait than to use `Thread.sleep()`.)
 
+				// To interrupt a thread, call `Thread::interrupt()` on it.
+				// Just like I called `super::interrupt()` up there!
+
+				// Calling `Thread.interrupted()` checks if the current thread has been
+				// interrupted, and also CLEARS this status!
+
+				// Calling `Thread::isInterrupted()` doesn't. This means that code outside of
+				// yours WILL be able to clear that flag. Yikes.
+
 				this.log("Literally everything is async and out of control!");
 				this.log("Woooooo-hoo!");
 			}
