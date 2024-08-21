@@ -59,22 +59,19 @@ public class App {
 					user = p_config.get(ConfigFileEntry.USER.toString()),
 					driver = p_config.get(ConfigFileEntry.DRIVER.toString());
 
+			// HACK ALERT! We have the entry now, so we can remove it for now:
+			p_config.put(ConfigFileEntry.DB.toString(), null);
+
 			final Scanner sc = new Scanner(System.in);
 
 			for (final Map.Entry<String, String> e : p_config.entrySet()) {
-				if (e.getValue() != "")
+				if (!"".equals(e.getValue())) // Why is `""` first? `NullPointerException`s!
 					continue;
 
 				System.out.printf(
 
-						"Did not find an entry for `%s` in the config file. Please provide it ",
+						"Did not find an entry for `%s` in the config file. Please provide it: ",
 						e.getKey()
-
-				);
-
-				System.out.printf(
-
-						"(Possible values: [ %s ]): "
 
 				);
 
