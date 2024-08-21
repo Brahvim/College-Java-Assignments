@@ -2,3 +2,6 @@
 bin
 
 # Files:
+
+# See `example.env` instead:
+.env
