@@ -95,7 +95,7 @@ public class App {
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
 		final Set<AppFlag> flags = new HashSet<>(AppFlag.values().length);
-		final Map<String, String> configuration = new HashMap<>(AppConfigEntry.values().length);
+		final Map<AppConfigEntry, String> configuration = new HashMap<>(AppConfigEntry.values().length);
 
 		// Add flags in:
 		for (final var s : p_args) {
@@ -120,8 +120,13 @@ public class App {
 		// Now we'll establish a connection with the DB:
 		try (final Connection connection = App.ensureConnection(configuration)) {
 
-			while (true)
-				App.interactiveModeIteration(flags, connection, configuration);
+			System.out.println("Connected! Please go on:");
+
+			final Scanner sc = new Scanner(System.in);
+			while (App.interactiveModeIteration(sc, flags, connection, configuration))
+				;
+
+			sc.close();
 
 		} catch (final SQLException e) {
 			e.printStackTrace();
@@ -139,7 +144,7 @@ public class App {
 	 * Reads the config file and stores it in the given
 	 * {@linkplain Map Map&lt;String,String&gt;}.
 	 */
-	public static void readConfigFile(final Map<String, String> p_config) {
+	public static void readConfigFile(final Map<AppConfigEntry, String> p_config) {
 		try (
 
 				final FileReader fileReader = new FileReader("./.env");
@@ -156,10 +161,12 @@ public class App {
 					continue;
 				}
 
-				final String value = line.substring(separatorId + 1);
-				final String key = line.substring(0, separatorId);
+				p_config.put(
 
-				p_config.put(key, value);
+						AppConfigEntry.valueOf(line.substring(0, separatorId)),
+						line.substring(separatorId + 1)
+
+				);
 			}
 
 		} catch (final IOException e) {
@@ -168,33 +175,32 @@ public class App {
 
 	}
 
-	public static Connection ensureConnection(final Map<String, String> p_config) {
+	public static Connection ensureConnection(final Map<AppConfigEntry, String> p_config) {
 		try {
-
-			final String
-			/*	 */ db = p_config.get(AppConfigEntry.DB.toString()),
-					host = p_config.get(AppConfigEntry.HOST.toString()),
-					port = p_config.get(AppConfigEntry.PORT.toString()),
-					pass = p_config.get(AppConfigEntry.PASS.toString()),
-					user = p_config.get(AppConfigEntry.USER.toString()),
-					driver = p_config.get(AppConfigEntry.DRIVER.toString());
 
 			final Scanner sc = new Scanner(System.in);
 
-			for (final Map.Entry<String, String> e : p_config.entrySet()) { // ALWAYS use `var`! I adapted this late...
-				final String value = e.getValue();
-				if (!(value == null || "".equals(value))) // Why is `""` first? `NullPointerException`s!
+			for (final var e : AppConfigEntry.values()) {
+				if (p_config.containsKey(e))
 					continue;
 
 				System.out.printf(
 
 						"Did not find an entry for `%s` in the config file. Please provide it: ",
-						e.getKey()
+						e.toString()
 
 				);
 
-				e.setValue(sc.nextLine());
+				p_config.put(e, sc.nextLine());
 			}
+
+			final String
+			/*	 */ db = p_config.get(AppConfigEntry.DB),
+					host = p_config.get(AppConfigEntry.HOST),
+					port = p_config.get(AppConfigEntry.PORT),
+					pass = p_config.get(AppConfigEntry.PASS),
+					user = p_config.get(AppConfigEntry.USER),
+					driver = p_config.get(AppConfigEntry.DRIVER);
 
 			sc.close(); // :(
 			// This was supposed to be needed again for interactive CLI program...
@@ -220,24 +226,34 @@ public class App {
 		return null;
 	}
 
-	public static void interactiveModeIteration(
+	/** @return Whether or not any inputs were read. */
+	public static boolean interactiveModeIteration(
+			final Scanner p_scanner,
 			final Set<AppFlag> p_flags,
 			final Connection p_connection,
-			final Map<String, String> p_config) {
+			final Map<AppConfigEntry, String> p_config) {
 
-		final Scanner sc = new Scanner(System.in);
 		final StringBuilder fullStatementStringBuilder = new StringBuilder();
+		final String statementBegin = "[" + p_config.get(AppConfigEntry.DRIVER) + "])> ";
 
-		for (String line = null; sc.hasNextLine(); line = sc.nextLine()) {
+		System.out.print(statementBegin);
+
+		if (!p_scanner.hasNextLine())
+			return false;
+
+		while (true) {
+			final String line = p_scanner.nextLine();
+
+			fullStatementStringBuilder
+					.append(line)
+					.append(' ');
+
 			// Using these instead of `String::endsWith()` for performance:
-
 			if (';' == line.charAt(line.length() - 1))
 				break;
 
-			fullStatementStringBuilder.append(line);
+			System.out.print("-> ");
 		}
-
-		sc.close();
 
 		try (
 
@@ -245,6 +261,8 @@ public class App {
 				final ResultSet result = statement.executeQuery(fullStatementStringBuilder.toString());
 
 		) {
+
+			System.out.println("Made your query...");
 
 		} catch (SQLException e) {
 			int i = 0; // Java arrays are limited to `Integer.MAX_VALUE`.
@@ -259,12 +277,19 @@ public class App {
 						""", // Reminder: Bringing the `"""` to the next line adds a line to the output.
 						// PS SonarLint suggested avoiding `\t` (UTF[-8] `u/0009`).
 						// `Tab`s are scaled according to environment variables!
-						i, e.getErrorCode(), e.getSQLState(), e.getMessage());
+						i + 1,
+						e.getErrorCode(),
+						e.getSQLState(),
+						e.getMessage()
+
+				);
 
 				++i;
 				e = e.getNextException();
 			}
 		}
+
+		return true;
 	}
 
 }
