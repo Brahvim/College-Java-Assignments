@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.function.UnaryOperator;
 
 public class App {
 
@@ -26,13 +27,38 @@ public class App {
 
 	public enum AppFlag {
 
-		CHECK_CONF(/* "-c" */);
+		CHECK_CONF("-c");
+
+		// region Class stuff.
+		private static final UnaryOperator<Map<String, AppFlag>> APP_FLAG_INTERNAL_MAP_FILLER = m -> {
+			for (final var e : AppFlag.values())
+				m.put(e.getIdentifier(), e);
+
+			return m;
+		};
+
+		private static final Map<String, AppFlag> IDENTIFIERS_MAP = AppFlag.APP_FLAG_INTERNAL_MAP_FILLER
+				.apply(new HashMap<>(AppFlag.values().length));
+
+		private final String identifier;
+
+		private AppFlag(final String p_identifier) {
+			this.identifier = p_identifier;
+		}
+
+		public String getIdentifier() {
+			return this.identifier;
+		}
+
+		public static AppFlag identifierToFlag(final String p_identifier) {
+		}
+		// endregion
 
 	}
 
 	public enum AppExitCode {
 
-		UNKNOWN_FLAG();
+		UNKNOWN_FLAG_PASSED();
 
 	}
 
@@ -57,11 +83,26 @@ public class App {
 		final ArrayList<AppFlag> flags = new ArrayList<>(AppFlag.values().length);
 		final Map<String, String> config = new HashMap<>(AppConfigEntry.values().length);
 
+		for (final String s : p_args)
+			flags.add(AppFlag.IDENTIFIERS_MAP.get(s));
+
+		for (final AppFlag f : flags) {
+			final String s = f.getIdentifier();
+
+			switch (f) {
+
+				case AppFlag.APP_FLAG_INTERNAL_MAP_FILLER: {
+
+				}
+					break;
+
+			}
+		}
+
 		App.readConfigFile(config);
 
 		// Now we'll establish a connection with the DB:
 		final Connection connection = App.ensureConnection(config);
-
 	}
 
 	public static Connection ensureConnection(final Map<String, String> p_config) {
@@ -145,6 +186,7 @@ public class App {
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 }
