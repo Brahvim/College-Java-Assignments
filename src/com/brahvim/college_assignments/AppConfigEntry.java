@@ -7,7 +7,7 @@ public enum AppConfigEntry {
 
 	DB(),
 	HOST(),
-	USER(),
+	USER(), // Keep this before `PASS()`! Order important when prompting users...
 	PASS(),
 	PORT(v -> {
 		try {
@@ -17,9 +17,7 @@ public enum AppConfigEntry {
 				return "`PORT` must be in the range `[0, 65535]`.";
 
 			return null;
-		} catch (
-
-	final NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			return "`PORT` must be an integer.";
 		}
 	}),

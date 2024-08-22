@@ -73,7 +73,8 @@ public class App {
 
 			final Scanner sc = new Scanner(System.in);
 			System.out.print(statementBegin);
-			System.out.flush();
+			System.out.flush(); // Good for interactive mode!
+			// Even if it doesn't fix that UNKNOWN BUG!
 
 			while (true) {
 				try { // NOSONAR
@@ -161,9 +162,10 @@ public class App {
 					continue;
 				}
 
-				final AppConfigEntry configEntry = AppConfigEntry.valueOf(line.substring(0, separatorId));
-				final String status = configEntry.getChecker().apply(line);
 				final String value = line.substring(separatorId + 1);
+
+				final AppConfigEntry configEntry = AppConfigEntry.valueOf(line.substring(0, separatorId));
+				final String status = configEntry.getChecker().apply(value);
 
 				if (status != null) {
 					if (!hasErrors) {
