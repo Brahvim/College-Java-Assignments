@@ -24,23 +24,35 @@ public enum AppConfigEntry {
 		}
 	}),
 
-	DRIVER(
+	DRIVER(v -> {
+		final String toRetPrefix = DriverManager.drivers().anyMatch(d -> d.toString().contains(v))
+				? null
+				: String.format(
 
-			v -> (
+						"Driver `%s` is not available. Please recompile with the required JDBC Java Archive (\"JAR\").%n",
+						v.substring(v.indexOf('=') + 1) // Pretty good code!
 
-			DriverManager.drivers()
-					.anyMatch(d -> d.toString().contains(v))
-							? null
-							: String.format(
+		);
 
-									"Driver `%s` is not available. Please recompile with the required JDBC JAR.",
-									v.substring(v.indexOf('=') + 1)
+		if (toRetPrefix == null)
+			return null;
 
-							)
+		final StringBuilder toRetBuilder = new StringBuilder(toRetPrefix);
+		toRetBuilder.append("\tList of currently available drivers:\n");
 
-			)
-
-	);
+		// Have to call `DriverManager.drivers()` twice because `Stream`s cannot be
+		// iterated more than once!:
+		DriverManager.drivers().forEach(d -> toRetBuilder
+				.append("\t-> ")
+				.append('`')
+				.append(d.toString().split("@")[0])
+				.append('`')
+				.append('\n')); // Most
+								// failure
+								// resistant
+								// code 👍️
+		return toRetBuilder.toString();
+	});
 
 	// region Class stuff.
 	private final UnaryOperator<String> checker;

@@ -55,7 +55,7 @@ public class App {
 		}
 
 		if (flags.contains(AppFlag.CHECK_CONF))
-			System.exit(AppExitCode.OKAY.getExitCode());
+			System.exit(AppExitCode.OKAY.ordinal());
 
 		// Now we'll establish a connection with the DB:
 		try (final Connection connection = AppDbUtils.ensureConnection(configuration)) {
@@ -117,7 +117,7 @@ public class App {
 	}
 
 	public static void exitApp(final AppExitCode p_flag) {
-		System.exit(p_flag.getExitCode());
+		System.exit(p_flag.ordinal());
 	}
 
 	public static void endConfigFileErrors() {
@@ -125,7 +125,7 @@ public class App {
 	}
 
 	public static void beginConfigFileErrors() {
-		System.out.println("\n====CONFIG FILE ERRORS!====\n");
+		System.out.println("\n=======CONFIG FILE ERRORS!=======\n");
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class App {
 						App.beginConfigFileErrors();
 					}
 
-					System.out.printf("Line `%d`: Missing `=`.%n", i);
+					System.out.printf("- Line `%d`: Missing `=`.%n", i);
 					System.out.printf("\t(Line content: \"%s\".)%n", line);
 					continue;
 				}
@@ -171,6 +171,7 @@ public class App {
 						App.beginConfigFileErrors();
 					}
 
+					System.out.print("- ");
 					System.out.println(status);
 				}
 
