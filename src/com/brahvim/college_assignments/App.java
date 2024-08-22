@@ -4,11 +4,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 import java.util.Set;
 
 public class App {
@@ -54,6 +53,8 @@ public class App {
 			App.exitApp(AppExitCode.INVALID_CONFIG_FILE);
 		}
 
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> System.out.println("\nBye! ^-^")));
+
 		if (flags.contains(AppFlag.CHECK_CONF))
 			System.exit(AppExitCode.OKAY.ordinal());
 
@@ -71,7 +72,6 @@ public class App {
 
 			);
 
-			final Scanner sc = new Scanner(System.in);
 			System.out.print(statementBegin);
 			System.out.flush(); // Good for interactive mode!
 			// Even if it doesn't fix that UNKNOWN BUG!
@@ -79,11 +79,7 @@ public class App {
 			while (true) {
 				try { // NOSONAR
 
-					final String line = sc.nextLine();
-
-					if (line.isBlank())
-						continue;
-
+					final String line = System.console().readLine();
 					fullStatementStringBuilder.append(line);
 
 					// Using these instead of `String::endsWith()` for performance:
@@ -99,19 +95,20 @@ public class App {
 					System.out.print("-> ");
 					System.out.flush();
 
-				} catch (final StringIndexOutOfBoundsException e) { // NOSONAR
-				} catch (final NoSuchElementException e) { // NOSONAR
-					// System.out.println("(No input yet.)");
-					// continue;
-				} catch (final IllegalStateException e) {
-					sc.close();
-					System.out.println("\nBye! ^-^");
+				} catch (final NullPointerException e) {
 					App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
 				}
 			}
 
-		} catch (final Exception e) {
-			e.printStackTrace();
+		} catch (final SQLException e) {
+			// e.printStackTrace();
+
+			// if (e instanceof SQLInvalidAuthorizationSpecException) // NOSONAR! Look at
+			// // the exception's class hierarchy!
+			// System.out.println("Access denied! Password incorrect...!");
+			// else
+
+			System.out.println(e.getMessage());
 		}
 
 		App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
