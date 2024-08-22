@@ -12,6 +12,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -22,9 +23,25 @@ public class App {
 		DB(),
 		HOST(),
 		PASS(),
-		PORT(),
 		USER(),
-		DRIVER();
+		DRIVER(),
+		PORT();
+
+		// region Class stuff.
+		private final Class<?> specialType;
+
+		private AppConfigEntry() {
+			this.specialType = String.class;
+		}
+
+		private AppConfigEntry(final Class<?> p_specialType) {
+			this.specialType = p_specialType;
+		}
+
+		public Class<?> getSpecialType() {
+			return this.specialType;
+		}
+		// endregion
 
 	}
 
@@ -126,7 +143,7 @@ public class App {
 			final StringBuilder fullStatementStringBuilder = new StringBuilder();
 			final String statementBegin = String.format(
 
-					"%s [%s])> ",
+					"[%s][%s])> ",
 					configuration.get(AppConfigEntry.DRIVER),
 					configuration.get(AppConfigEntry.DB)
 
@@ -134,29 +151,54 @@ public class App {
 
 			final Scanner sc = new Scanner(System.in);
 			System.out.print(statementBegin);
+			System.out.flush();
 
-			while (sc.hasNextLine()) {
-				final String line = sc.nextLine();
-				fullStatementStringBuilder.append(line);
+			while (true) {
+				try {
+					final String line = sc.nextLine();
 
-				// Using these instead of `String::endsWith()` for performance:
-				if (';' == line.charAt(line.length() - 1))
-					break;
+					if (line == null)
+						continue;
 
-				fullStatementStringBuilder.append(' ');
-				System.out.print("-> ");
+					fullStatementStringBuilder.append(line);
+
+					// Using these instead of `String::endsWith()` for performance:
+					if (';' == line.charAt(line.length() - 1)) {
+						App.runQueryForConnection(fullStatementStringBuilder.toString(), connection);
+						fullStatementStringBuilder.delete(0, fullStatementStringBuilder.length());
+						System.out.printf("%n%s", statementBegin);
+						System.out.flush();
+						continue;
+					}
+
+					fullStatementStringBuilder.append(' ');
+					System.out.print("-> ");
+					System.out.flush();
+
+				} catch (final NoSuchElementException e) {
+					// System.out.println("(No input yet.)");
+					// continue;
+				} catch (final IllegalStateException e) {
+					sc.close();
+					System.out.println("\nBye! ^-^");
+					App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
+				}
 			}
-
-			sc.close();
-			System.out.println();
-			App.runQueryForConnection(fullStatementStringBuilder.toString(), connection);
 
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 
-		System.out.println("\nBye! ^-^");
 		App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
+	}
+
+	public static String read(final Scanner p_scanner) {
+		try {
+			return p_scanner.nextLine();
+		} catch (final NoSuchElementException e) {
+			p_scanner.close();
+			return null;
+		}
 	}
 
 	public static void exitApp(final AppExitCode p_flag) {
@@ -194,6 +236,14 @@ public class App {
 
 		} catch (final IOException e) {
 			e.printStackTrace();
+		}
+
+		// Is the port valid?:
+		try {
+			Integer.valueOf(p_config.get(AppConfigEntry.PORT));
+		} catch (final NumberFormatException e) {
+			p_config.put(AppConfigEntry.PASS, null);
+			System.out.println("Port number is not an integer! This will be asked for later.");
 		}
 
 	}
