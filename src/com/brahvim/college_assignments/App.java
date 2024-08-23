@@ -76,29 +76,8 @@ public class App {
 			System.out.flush(); // Good for interactive mode!
 			// Even if it doesn't fix that UNKNOWN BUG!
 
-			while (true) {
-				try { // NOSONAR
-
-					final String line = System.console().readLine();
-					fullStatementStringBuilder.append(line);
-
-					// Using these instead of `String::endsWith()` for performance:
-					if (';' == line.charAt(line.length() - 1)) {
-						AppDbUtils.runQueryForConnection(fullStatementStringBuilder.toString(), connection);
-						System.out.printf("%n%s", statementBegin);
-						fullStatementStringBuilder.setLength(0);
-						System.out.flush();
-						continue;
-					}
-
-					fullStatementStringBuilder.append(' ');
-					System.out.print("-> ");
-					System.out.flush();
-
-				} catch (final NullPointerException e) {
-					App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
-				}
-			}
+			while (true)
+				App.interactiveModeIteration(connection, fullStatementStringBuilder, statementBegin);
 
 		} catch (final SQLException e) {
 			// e.printStackTrace();
@@ -112,6 +91,32 @@ public class App {
 		}
 
 		App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
+	}
+
+	private static void interactiveModeIteration(final Connection connection,
+			final StringBuilder fullStatementStringBuilder,
+			final String statementBegin) {
+		try {
+
+			final String line = System.console().readLine();
+			fullStatementStringBuilder.append(line);
+
+			// Using these instead of `String::endsWith()` for performance:
+			if (';' == line.charAt(line.length() - 1)) {
+				AppDbUtils.runQueryForConnection(fullStatementStringBuilder.toString(), connection);
+				System.out.printf("%n%s", statementBegin);
+				fullStatementStringBuilder.setLength(0);
+				System.out.flush();
+				return;
+			}
+
+			fullStatementStringBuilder.append(' ');
+			System.out.print("-> ");
+			System.out.flush();
+
+		} catch (final NullPointerException e) {
+			App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
+		}
 	}
 
 	public static void exitApp(final AppExitCode p_flag) {
@@ -146,21 +151,41 @@ public class App {
 				if (line == null)
 					line = reader.readLine();
 
+				final int commentStart = line.indexOf('#');
+
+				switch (commentStart) {
+					case -1 -> {
+						// Nothing!
+						// DON'T remove this case!
+						// It's here to ensure that `default` isn't executed!
+					}
+					case 0 -> {
+						continue;
+					}
+					default -> {
+						line = line.substring(0, commentStart - 1);
+					}
+				}
+
 				final int separatorId = line.indexOf('=');
 
 				if (separatorId == -1) {
-					if (!hasErrors) {
-						hasErrors = true;
-						App.beginConfigFileErrors();
+					if (!(line.isBlank() || (commentStart == 0))) {
+						if (!hasErrors) {
+							hasErrors = true;
+							App.beginConfigFileErrors();
+						}
+
+						System.out.printf("\t(Line content: \"%s\".)%n", line);
+						System.out.printf("- Line `%d`: Missing `=`.%n", i + 1);
 					}
 
-					System.out.printf("- Line `%d`: Missing `=`.%n", i);
-					System.out.printf("\t(Line content: \"%s\".)%n", line);
+					++i; // NOSONAR, you don't understand the logic!
+					line = null;
 					continue;
 				}
 
 				final String value = line.substring(separatorId + 1);
-
 				final AppConfigEntry configEntry = AppConfigEntry.valueOf(line.substring(0, separatorId));
 				final String status = configEntry.getChecker().apply(value);
 

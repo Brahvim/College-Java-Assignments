@@ -3,6 +3,7 @@ package com.brahvim.college_assignments;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
@@ -83,6 +84,29 @@ public class AppDbUtils {
         ) {
 
             System.out.println("Made your query...");
+
+            final ResultSetMetaData metaData = result.getMetaData();
+
+            final int columnCount = metaData.getColumnCount();
+            final String[] columnNames = new String[columnCount];
+            final int[] columnNameLengths = new int[columnCount];
+
+            for (int i = 0; i < columnCount; ++i) {
+                final String label = metaData.getColumnLabel(columnCount);
+                columnNameLengths[i] = label.length();
+                columnNames[i] = label;
+            }
+
+            while (result.next()) {
+                for (int i = 1; i <= columnCount; i++) { // SQL uses `1`-based indices :/
+                    final String value = result.getString(i);
+                    if (value == null)
+                        continue;
+
+                    
+
+                }
+            }
 
         } catch (SQLException e) {
             int i = 0; // Java arrays are limited to `Integer.MAX_VALUE`.
