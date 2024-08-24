@@ -5,7 +5,12 @@ import java.util.Map;
 
 public enum AppFlag {
 
-    CHECK_CONF("-c");
+    CONF_PATH("f"),
+    SKIP_ENTRY("x"),
+    IGNORE_CONF("i"),
+    CHECK_CONF_AND_EXIT("c")
+
+    /*  */;
 
     // region Class stuff.
     private static final Map<String, AppFlag> IDENTIFIERS_MAP = new HashMap<>(AppFlag.values().length);

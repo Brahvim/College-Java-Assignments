@@ -6,13 +6,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class App {
 
 	public static void main(final String[] p_args) {
+		// `^C`/`^D` Unix signal handler:
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> System.out.println("\nBye! ^-^")));
+
 		// Learn to use Maven/Gradle/Ant (okay, NOT ANT!) or simply add in this JAR when
 		// compiling - build systems will allow you to update as needed: [
 		// https://dlm.mariadb.com/3852266/Connectors/java/connector-java-3.4.1/mariadb-java-client-3.4.1.jar
@@ -30,32 +31,86 @@ public class App {
 
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
-		final Set<AppFlag> flags = new HashSet<>(AppFlag.values().length);
+		final Map<AppFlag, String> flags = new EnumMap<>(AppFlag.class);
 		final Map<AppConfigEntry, String> configuration = new EnumMap<>(AppConfigEntry.class);
 
-		// Add flags in:
+		// Parse flags in:
 		for (final var s : p_args) {
-			final AppFlag f = AppFlag.identifierToFlag(s);
+			final int length = s.length();
 
-			if (f == null)
-				continue;
+			switch (length) {
+				case 0 -> {
+				}
 
-			flags.add(f);
+				case 1 -> {
+					final AppFlag parsed = AppFlag.identifierToFlag(s);
+
+					if (parsed == null)
+						App.exit(AppExitCode.UNKNOWN_FLAG_PASSED);
+
+					flags.put(parsed, null);
+				}
+
+				default -> {
+					for (int i = 0; i < length; ++i) {
+						final char c = s.charAt(i);
+
+						if (c == '-')
+							continue;
+
+						final AppFlag parsed = AppFlag.identifierToFlag(Character.toString(c));
+
+						if (parsed == null)
+							App.exit(AppExitCode.UNKNOWN_FLAG_PASSED);
+
+						// ...Store it already:
+						flags.put(parsed, null);
+
+						switch (parsed) {
+							case CONF_PATH -> {
+								final int iStore = i;
+
+								boolean hadPath = false;
+
+								// Traverse till the end of this token of flags:
+								for (; i < length; ++i) {
+									if (Character.isWhitespace(s.charAt(i))) {
+										hadPath = true;
+										break;
+									}
+								}
+
+								if (hadPath) {
+									int pathEnd = -1;
+									if (s.charAt(i) == '"') {
+										for (int j = 0; j < length; j++) {
+											pathEnd = j;
+											if (s.charAt(i) == '"')
+												break;
+										}
+									}
+								}
+
+								i = iStore;
+							}
+
+							case SKIP_ENTRY -> {
+							}
+
+							default -> {
+							}
+						}
+					}
+				}
+			}
 		}
 
-		// for (final var f : flags)
-		// switch (f) {
-		//
-		// }
-
-		if (App.readConfigFile(configuration)) {
+		if (!flags.containsKey(AppFlag.IGNORE_CONF) && App.readConfigFile(flags, configuration)) {
 			App.endConfigFileErrors();
-			App.exitApp(AppExitCode.INVALID_CONFIG_FILE);
+			App.exit(AppExitCode.INVALID_CONFIG_FILE);
 		}
 
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> System.out.println("\nBye! ^-^")));
-
-		if (flags.contains(AppFlag.CHECK_CONF))
+		if (flags.containsKey(AppFlag.CHECK_CONF_AND_EXIT))
 			System.exit(AppExitCode.OKAY.ordinal());
 
 		// Now we'll establish a connection with the DB:
@@ -90,7 +145,7 @@ public class App {
 			System.out.println(e.getMessage());
 		}
 
-		App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
+		App.exit(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
 	}
 
 	private static void interactiveModeIteration(final Connection connection,
@@ -115,11 +170,11 @@ public class App {
 			System.out.flush();
 
 		} catch (final NullPointerException e) {
-			App.exitApp(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
+			App.exit(AppExitCode.OKAY); // This is a safeguard for those who copy/refactor code!
 		}
 	}
 
-	public static void exitApp(final AppExitCode p_flag) {
+	public static void exit(final AppExitCode p_flag) {
 		System.exit(p_flag.ordinal());
 	}
 
@@ -135,7 +190,8 @@ public class App {
 	 * Reads the config file and stores it in the given
 	 * {@linkplain Map Map&lt;String,String&gt;}.
 	 */
-	public static boolean readConfigFile(final Map<AppConfigEntry, String> p_config) {
+	public static boolean readConfigFile(final Map<AppFlag, String> p_flags,
+			final Map<AppConfigEntry, String> p_config) {
 		try (
 
 				final FileReader fileReader = new FileReader("./.env");
