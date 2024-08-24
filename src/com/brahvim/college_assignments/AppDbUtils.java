@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.brahvim.college_assignments.enums.AppConfigEntry;
+
 public class AppDbUtils {
 
 	private AppDbUtils() {
@@ -24,7 +26,9 @@ public class AppDbUtils {
 
 			System.out.printf(
 
-					"Did not find an entry for `%s` in the config file. Please provide it: ",
+					"".equals(p_config.get(e))
+							? "Entry for `%s` in the file ignored. Please provide new entry data:"
+							: "Did not find an entry for `%s` in the config file. Please provide it: ",
 					e.toString()
 
 			);

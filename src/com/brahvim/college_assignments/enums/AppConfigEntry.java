@@ -1,4 +1,4 @@
-package com.brahvim.college_assignments;
+package com.brahvim.college_assignments.enums;
 
 import java.sql.DriverManager;
 import java.util.function.UnaryOperator;
@@ -9,6 +9,7 @@ public enum AppConfigEntry {
 	HOST(),
 	USER(), // Keep this before `PASS()`! Order important when prompting users...
 	PASS(),
+	PATH(),
 	PORT(v -> {
 		try {
 			final int port = Integer.parseInt(v);
