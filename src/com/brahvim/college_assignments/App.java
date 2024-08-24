@@ -180,7 +180,7 @@ public class App {
 						System.out.printf("- Line `%d`: Missing `=`.%n", i + 1);
 					}
 
-					++i; // NOSONAR, you don't understand the logic!
+					++i;
 					line = null;
 					continue;
 				}
@@ -202,7 +202,7 @@ public class App {
 
 				p_config.put(configEntry, value);
 				line = null;
-				++i; // NOSONAR, you don't understand the logic!
+				++i;
 			}
 
 			return hasErrors;
