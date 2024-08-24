@@ -18,8 +18,6 @@ public class AppDbUtils {
 	}
 
 	public static Connection ensureConnection(final Map<AppConfigEntry, String> p_config) throws SQLException {
-		// final Scanner sc = new Scanner(System.in);
-
 		for (final var e : AppConfigEntry.values()) {
 			if (p_config.containsKey(e))
 				continue;
@@ -35,8 +33,6 @@ public class AppDbUtils {
 			boolean valid = false;
 
 			while (!valid) {
-				// value = sc.nextLine();
-
 				switch (e) {
 					default -> value = System.console().readLine();
 					case PASS -> value = new String(System.console().readPassword());
@@ -46,14 +42,10 @@ public class AppDbUtils {
 
 				if (valid)
 					break;
-
 			}
 
 			p_config.put(e, value);
 		}
-
-		// sc.close(); // :(
-		// This was supposed to be needed again for interactive CLI program...
 
 		final String
 		/*	 */ db = p_config.get(AppConfigEntry.DB),
@@ -151,8 +143,9 @@ public class AppDbUtils {
 		final int[] rowStrLenMaxes = new int[columnCount];
 		final String[] columnLabels = new String[columnCount];
 
-		{
-			p_set.next();
+		// Parse out column labels and the first row. ...Also compare their lengths!:
+		{ // New scope to hide `firstRowData`.
+			p_set.next(); // For some reason...? Yeah... This has to be called FIRST.
 			final List<String> firstRowData = new ArrayList<>(columnCount);
 			cellData.add(firstRowData);
 
@@ -168,7 +161,7 @@ public class AppDbUtils {
 			}
 		}
 
-		// Okay. It's time:
+		// Okay. It's time!
 		// For every row,
 		while (p_set.next()) {
 			final List<String> rowData = new ArrayList<>(columnCount);
@@ -184,7 +177,7 @@ public class AppDbUtils {
 			}
 		}
 
-		// Print the row with column labels:
+		// Print the row with column labels. And the padding:
 		for (int i = 0; i < columnCount; ++i) {
 			final String label = columnLabels[i];
 			final int labelLength = label.length();
@@ -197,7 +190,7 @@ public class AppDbUtils {
 
 		System.out.println();
 
-		// Print everything else:
+		// Print everything else. WITH padding!:
 		final int rowCount = cellData.size();
 		for (int i = 0; i < rowCount; ++i) {
 			final List<String> row = cellData.get(i);

@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class App {
 
@@ -29,7 +30,27 @@ public class App {
 		// are two; the other one's used for JDK classes and is called the "bootstrap
 		// loader", ...I think.)
 
-		System.out.println("Welcome to \"Yet Another DB CLI\"...");
+		final AtomicBoolean parsingOver = new AtomicBoolean();
+
+		new Thread() {
+
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(1000);
+					synchronized (parsingOver) {
+						if (parsingOver.get())
+							return;
+
+						System.out.println("(Still parsing flags! Please wait...)");
+						parsingOver.notifyAll();
+					}
+				} catch (final InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+
+		}.start();
 
 		final Map<AppFlag, String> flags = new EnumMap<>(AppFlag.class);
 		final Map<AppConfigEntry, String> configuration = new EnumMap<>(AppConfigEntry.class);
@@ -77,6 +98,12 @@ public class App {
 
 		if (flags.containsKey(AppFlag.CHECK_CONF_AND_EXIT))
 			System.exit(AppExitCode.OKAY.ordinal());
+
+		synchronized (parsingOver) {
+			parsingOver.set(true);
+		}
+
+		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
 		// Now we'll establish a connection with the DB:
 		try (final Connection connection = AppDbUtils.ensureConnection(configuration)) {
