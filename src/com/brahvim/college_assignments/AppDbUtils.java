@@ -177,7 +177,7 @@ public class AppDbUtils {
 			// For every cell in said row,
 			for (int i = 1; i <= columnCount; ++i) {
 				final int lastId = i - 1;
-				final String string = p_set.getString(i);
+				final String string = AppDbUtils.ensureNullCellDataAsString(p_set.getString(i));
 
 				rowStrLenMaxes[lastId] = Math.max(rowStrLenMaxes[lastId], string.length());
 				rowData.add(string);
