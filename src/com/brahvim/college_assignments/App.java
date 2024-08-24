@@ -65,41 +65,6 @@ public class App {
 
 						// ...Store it already:
 						flags.put(parsed, null);
-
-						switch (parsed) {
-							case CONF_PATH -> {
-								final int iStore = i;
-
-								boolean hadPath = false;
-
-								// Traverse till the end of this token of flags:
-								for (; i < length; ++i) {
-									if (Character.isWhitespace(s.charAt(i))) {
-										hadPath = true;
-										break;
-									}
-								}
-
-								if (hadPath) {
-									int pathEnd = -1;
-									if (s.charAt(i) == '"') {
-										for (int j = 0; j < length; j++) {
-											pathEnd = j;
-											if (s.charAt(i) == '"')
-												break;
-										}
-									}
-								}
-
-								i = iStore;
-							}
-
-							case SKIP_ENTRY -> {
-							}
-
-							default -> {
-							}
-						}
 					}
 				}
 			}
@@ -190,7 +155,8 @@ public class App {
 	 * Reads the config file and stores it in the given
 	 * {@linkplain Map Map&lt;String,String&gt;}.
 	 */
-	public static boolean readConfigFile(final Map<AppFlag, String> p_flags,
+	public static boolean readConfigFile(
+			final Map<AppFlag, String> p_flags,
 			final Map<AppConfigEntry, String> p_config) {
 		try (
 
