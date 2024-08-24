@@ -5,7 +5,10 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class AppDbUtils {
@@ -76,39 +79,32 @@ public class AppDbUtils {
     }
 
     public static void runQueryForConnection(final String p_query, final Connection p_connection) {
-        try (
+        try (final Statement statement = p_connection.createStatement()) {
 
-                final Statement statement = p_connection.createStatement();
-                final ResultSet result = statement.executeQuery(p_query);
+            boolean resultsAvailable = statement.execute(p_query);
+            AppDbUtils.printStatementUpdateCount(statement);
 
-        ) {
+            if (!resultsAvailable)
+                return;
 
-            System.out.println("Made your query...");
+            // ^^^ Doing this beforehand may be bad for branch prediction, since the loop
+            // would be skipped if it was false anyway, but this is necessary - because the
+            // loop calls `Statement::getResultSet()` which *can* cause a crash if
+            // update-count is below `1`.
 
-            final ResultSetMetaData metaData = result.getMetaData();
-
-            final int columnCount = metaData.getColumnCount();
-            final String[] columnNames = new String[columnCount];
-            final int[] columnNameLengths = new int[columnCount];
-
-            for (int i = 0; i < columnCount; ++i) {
-                final String label = metaData.getColumnLabel(columnCount);
-                columnNameLengths[i] = label.length();
-                columnNames[i] = label;
-            }
-
-            while (result.next()) {
-                for (int i = 1; i <= columnCount; i++) { // SQL uses `1`-based indices :/
-                    final String value = result.getString(i);
-                    if (value == null)
-                        continue;
-
-                    
-
-                }
+            while (resultsAvailable) {
+                final ResultSet result = statement.getResultSet();
+                resultsAvailable = statement.getMoreResults();
+                AppDbUtils.prettyPrintResultSet(result);
             }
 
         } catch (SQLException e) {
+
+            if (e instanceof SQLTimeoutException) {
+                System.out.println("Request timed out. No changes made.");
+                return;
+            }
+
             int i = 0; // Java arrays are limited to `Integer.MAX_VALUE`.
             System.out.println("Errors occurred!:");
 
@@ -131,6 +127,70 @@ public class AppDbUtils {
                 ++i;
                 e = e.getNextException();
             }
+        }
+    }
+
+    public static void printStatementUpdateCount(final Statement p_statement) throws SQLException {
+        final int updateCount = p_statement.getUpdateCount();
+
+        switch (updateCount) {
+            default -> System.out.printf("(`%d` rows affected.)%n", updateCount);
+            case -1 -> System.out.println("(No rows affected by DML query.)");
+            case 0 -> System.out.println("(No rows affected.)");
+        }
+    }
+
+    public static void prettyPrintResultSet(final ResultSet p_set) throws SQLException {
+        final ResultSetMetaData metaData = p_set.getMetaData();
+        final int columnCount = metaData.getColumnCount();
+
+        // Row-major order, mind you!:
+        final List<String> data = new ArrayList<>(columnCount); // Can't guarantee size!...
+        final List<String> columnLabels = new ArrayList<>(columnCount);
+        final List<Integer> dataLengthMaxes = new ArrayList<>(columnCount);
+
+        p_set.next();
+
+        for (int i = 1; i <= columnCount; ++i) {
+            final String string = p_set.getString(i);
+            final String columnLabel = metaData.getColumnLabel(i);
+
+            dataLengthMaxes.add(columnLabel.length());
+            dataLengthMaxes.add(string.length());
+            columnLabels.add(columnLabel);
+            data.add(string);
+        }
+
+        // For every row,
+        while (p_set.next())
+            // For every cell in said row,
+            for (int i = 1; i <= columnCount; ++i) {
+                final int lastId = i - 1;
+                final String string = p_set.getString(i);
+                final int currentStrLen = string.length();
+                final Integer lastBest = dataLengthMaxes.get(lastId);
+
+                data.add(string);
+                dataLengthMaxes.set(
+
+                        lastId,
+                        lastBest > currentStrLen
+                                ? lastBest
+                                : currentStrLen
+
+                );
+            }
+
+        final int rowCount = data.size();
+
+        for (int i = 0; i < rowCount; i++) {
+            System.out.printf(
+
+                    "%s%n",
+                    data.get(i)
+
+            );
+
         }
     }
 

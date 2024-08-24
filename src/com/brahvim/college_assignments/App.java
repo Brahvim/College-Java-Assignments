@@ -185,10 +185,11 @@ public class App {
 					continue;
 				}
 
-				final String value = line.substring(separatorId + 1);
-				final AppConfigEntry configEntry = AppConfigEntry.valueOf(line.substring(0, separatorId));
-				final String status = configEntry.getChecker().apply(value);
+				final String value = line.substring(separatorId + 1).trim();
+				final String entryName = line.substring(0, separatorId).trim();
+				final AppConfigEntry configEntry = AppConfigEntry.valueOf(entryName);
 
+				final String status = configEntry.getChecker().apply(value);
 				if (status != null) {
 					if (!hasErrors) {
 						hasErrors = true;
