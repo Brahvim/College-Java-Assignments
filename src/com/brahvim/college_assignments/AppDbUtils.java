@@ -148,7 +148,7 @@ public class AppDbUtils {
 		final List<List<String>> cellData = new ArrayList<>(columnCount); // Can't guarantee size!...
 
 		// These are needed per column:
-		final int[] dataLengthMaxes = new int[columnCount];
+		final int[] rowStrLenMaxes = new int[columnCount];
 		final String[] columnLabels = new String[columnCount];
 
 		{
@@ -162,7 +162,7 @@ public class AppDbUtils {
 				final String label = metaData.getColumnLabel(i);
 				final String string = AppDbUtils.ensureNullCellDataAsString(p_set.getString(i));
 
-				dataLengthMaxes[lastId] = Math.max(string.length(), label.length());
+				rowStrLenMaxes[lastId] = Math.max(string.length(), label.length());
 				columnLabels[lastId] = label;
 				firstRowData.add(string);
 			}
@@ -179,87 +179,32 @@ public class AppDbUtils {
 				final int lastId = i - 1;
 				final String string = p_set.getString(i);
 
-				dataLengthMaxes[lastId] = Math.max(dataLengthMaxes[lastId], string.length());
+				rowStrLenMaxes[lastId] = Math.max(rowStrLenMaxes[lastId], string.length());
 				rowData.add(string);
 			}
 		}
-
-		// System.out.println();
-		// System.out.println();
-		// System.out.println("Column labels:");
-		// for (final String string : columnLabels) {
-		// System.out.println(string);
-		// }
-
-		// System.out.println();
-		// System.out.println();
-		// System.out.println("Max lengths:");
-		// for (final var a : dataLengthMaxes) {
-		// System.out.println(a);
-		// }
-
-		// System.out.println();
-		// System.out.println();
-		// System.out.println("Cells:");
-		// System.out.println(cellData.size());
-		// cellData.forEach(System.out::println);
-
-		// for (int i = 0; i < columnCount; ++i) {
-		// final List<String> row = cellData.get(i);
-		// final int rowMaxLength = dataLengthMaxes[i];
-
-		// System.out.println(columnLabels[i]);
-
-		// for (int j = 0; j < columnLabels.length; ++j) {
-		// final String cellEntry = row.get(j);
-		// final int cellEntryStrLen = cellEntry.length();
-		// System.out.printf("%s%s", cellEntry, " ".repeat(rowMaxLength -
-		// cellEntryStrLen));
-		// }
-		// }
-
-		// for (int i = 0; i < columnCount; ++i) {
-		// final String label = columnLabels[i];
-		// final int labelLength = label.length();
-		// final int rowLongestStrLen = dataLengthMaxes[i];
-		// final int labelStrPadding = rowLongestStrLen - labelLength;
-
-		// System.out.printf("%s%s", label, " ".repeat(labelStrPadding));
-
-		// final List<String> rowData = cellData.get(i);
-		// final int rowCount = rowData.size();
-
-		// for (int j = 0; j < rowCount; ++j) {
-		// final String cellStr = rowData.get(j);
-		// final int cellStrLen = cellStr.length();
-		// final int rowStrPadding = rowLongestStrLen - cellStrLen;
-		// System.out.printf("%s%s", cellStr, " ".repeat(rowStrPadding));
-		// }
-
-		// System.out.println();
-		// }
 
 		// Print the row with column labels:
 		for (int i = 0; i < columnCount; ++i) {
 			final String label = columnLabels[i];
 			final int labelLength = label.length();
-			final int maxLength = dataLengthMaxes[i];
+			final int maxLength = rowStrLenMaxes[i];
 			final int paddingLength = maxLength - labelLength;
-			final String padding = " ".repeat(labelLength + paddingLength);
+			final String padding = " ".repeat(labelLength + (paddingLength * 2));
 
 			System.out.printf("%s%s", label, padding);
 		}
 
 		System.out.println();
 
-		// Print rows with row data:
-		final int max = cellData.size();
-		for (int i = 0; i < max; ++i) {
+		// Print everything else:
+		final int rowCount = cellData.size();
+		for (int i = 0; i < rowCount; ++i) {
 			final List<String> row = cellData.get(i);
-			final int maxLength = dataLengthMaxes[i];
 
 			for (int j = 0; j < columnCount; ++j) {
 				final String cell = row.get(j);
+				final int maxLength = rowStrLenMaxes[j];
 
 				if (cell == null) {
 					System.out.print(" ".repeat(maxLength));
@@ -268,14 +213,13 @@ public class AppDbUtils {
 
 				final int cellLength = cell.length();
 				final int paddingLength = maxLength - cellLength;
-				final String padding = " ".repeat(cellLength + paddingLength);
+				final String padding = " ".repeat(cellLength + (paddingLength * 2));
 
 				System.out.printf("%s%s", cell, padding);
 			}
 
 			System.out.println();
 		}
-
 	}
 
 	public static String ensureNullCellDataAsString(final String p_label) {
