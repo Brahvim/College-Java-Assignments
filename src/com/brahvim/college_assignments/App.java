@@ -111,20 +111,15 @@ public class App {
 			System.out.println("Connected! Please go on:\n");
 
 			final StringBuilder fullStatementStringBuilder = new StringBuilder();
-			final String statementBegin = String.format(
-
-					"[%s][%s])> ",
-					configuration.get(AppConfigEntry.DRIVER),
-					configuration.get(AppConfigEntry.DB)
-
-			);
+			final String statementBegin = String.format("[%s])> ", configuration.get(AppConfigEntry.DRIVER));
 
 			System.out.print(statementBegin);
 			System.out.flush(); // Good for interactive mode!
 			// Even if it doesn't fix that UNKNOWN BUG!
 
-			while (true)
+			while (true) {
 				App.interactiveModeIteration(connection, fullStatementStringBuilder, statementBegin);
+			}
 
 		} catch (final SQLException e) {
 			// e.printStackTrace();
