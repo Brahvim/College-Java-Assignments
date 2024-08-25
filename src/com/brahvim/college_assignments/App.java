@@ -88,7 +88,7 @@ public class App {
 
 			System.out.printf(
 
-					empty
+					empty // Didn't split into two loops for less branches because of this!
 							? "Entry for `%s` in the file ignored. Please provide new entry data: "
 							: "Did not find an entry for `%s` in the config file. Please provide it: ",
 					e.toString()
