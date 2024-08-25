@@ -35,8 +35,9 @@ public class App {
 		// loader", ...I think.)
 
 		final Map<AppConfigEntry, String> configuration = /* */
-				AppParser.beginAllParsing(new String[] { "-r", "./Test.sql", "-r", "./Test copy.sql" });
-		// AppParser.beginAllParsing(p_args);
+				AppParser.beginAllParsing(p_args);
+		// AppParser.beginAllParsing(new String[] { "-r", "./Test.sql" });
+
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
 		App.askUserForAbsentConfigs(configuration);

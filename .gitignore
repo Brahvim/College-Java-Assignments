@@ -2,6 +2,7 @@
 bin
 
 # Files:
-
-# See `example.env` instead:
+Test.sql
 .env
+# (See `example.env` instead.)
+
