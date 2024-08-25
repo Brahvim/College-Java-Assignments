@@ -2,6 +2,7 @@ package com.brahvim.college_assignments.enums;
 
 import java.io.File;
 import java.sql.DriverManager;
+import java.util.EnumSet;
 import java.util.function.UnaryOperator;
 
 public enum AppConfigEntry {
@@ -67,6 +68,18 @@ public enum AppConfigEntry {
 	});
 
 	// region Class stuff.
+	public static final AppConfigEntry[] MAY_NOT_ASK_USER = new AppConfigEntry[] { AppConfigEntry.SQL_PATH };
+	public static final AppConfigEntry[] MAY_ASK_USER;
+
+	static {
+		final EnumSet<AppConfigEntry> mayAskUserSet = EnumSet.allOf(AppConfigEntry.class);
+
+		for (final AppConfigEntry entry : AppConfigEntry.MAY_NOT_ASK_USER)
+			mayAskUserSet.remove(entry);
+
+		MAY_ASK_USER = mayAskUserSet.toArray(new AppConfigEntry[0]);
+	}
+
 	private final UnaryOperator<String> checker;
 
 	private AppConfigEntry() {

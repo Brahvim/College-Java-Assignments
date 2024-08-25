@@ -5,6 +5,7 @@
         "lib/**/*.jar"
     ],
     "cSpell.words": [
-        "missings"
+        "missings",
+        "REPROMPTABLE"
     ],
 }

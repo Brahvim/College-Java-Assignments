@@ -35,10 +35,9 @@ public class App {
 		// loader", ...I think.)
 
 		final Map<AppConfigEntry, String> configuration = /* */
-				// AppParser.beginAllParsing(p_args);
-				AppParser.beginAllParsing(new String[] {
-						// "-r", "./Test.sql",
-						"-x", "HOST" });
+				AppParser.beginAllParsing(p_args);
+		// AppParser.beginAllParsing(new String[] { "-r", "./Test.sql", "-x", "HOST",
+		// "-r", "./Test.sql" });
 
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 		App.askUserForAbsentConfigs(configuration);
@@ -78,15 +77,18 @@ public class App {
 	}
 
 	private static void askUserForAbsentConfigs(final Map<AppConfigEntry, String> p_config) {
-		for (final var e : AppConfigEntry.values()) {
+		for (final var e : AppConfigEntry.MAY_ASK_USER) {
 			final String oldValue = p_config.get(e);
 
-			if (oldValue != null)
+			final boolean isNull = oldValue == null;
+			final boolean empty = "".equals(oldValue);
+
+			if (!(isNull || empty))
 				continue;
 
 			System.out.printf(
 
-					"".equals(p_config.get(e))
+					empty
 							? "Entry for `%s` in the file ignored. Please provide new entry data: "
 							: "Did not find an entry for `%s` in the config file. Please provide it: ",
 					e.toString()

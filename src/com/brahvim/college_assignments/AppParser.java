@@ -31,9 +31,6 @@ public class AppParser {
         final Queue<AppParserFlag> parserFlags = new ArrayDeque<>(p_args.length);
         final Map<AppConfigEntry, String> configuration = new EnumMap<>(AppConfigEntry.class);
 
-        if (!configuration.containsKey(AppConfigEntry.SQL_PATH))
-            configuration.put(AppConfigEntry.SQL_PATH, "");
-
         if (!configuration.containsKey(AppConfigEntry.CONF_PATH))
             configuration.put(
 
@@ -45,6 +42,9 @@ public class AppParser {
         // Parse flags in:
         for (final var s : p_args)
             AppParser.flagParserIteration(s, flags, parserFlags, configuration);
+
+        if (!configuration.containsKey(AppConfigEntry.SQL_PATH))
+            configuration.put(AppConfigEntry.SQL_PATH, "");
 
         if (!flags.containsKey(AppFlag.IGNORE_CONF)) {
             if (AppParser.readConfigFile(configuration)) {
@@ -149,7 +149,7 @@ public class AppParser {
                 }
 
                 if ("".equals(p_config.get(configEntry))) { // If there was no value earlier, do the same!
-                    p_config.put(configEntry, null);
+                    p_config.put(configEntry, "");
                     line = null;
                     continue;
                 }
