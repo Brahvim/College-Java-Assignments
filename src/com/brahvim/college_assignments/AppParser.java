@@ -53,7 +53,7 @@ public class AppParser {
             }
 
             if (flags.containsKey(AppFlag.CHECK_CONF_AND_EXIT))
-                System.exit(AppExitCode.OKAY.ordinal());
+                App.exit(AppExitCode.OKAY);
         }
 
         synchronized (parsingOver) {
@@ -276,26 +276,16 @@ public class AppParser {
             }
 
             case 1 -> {
-                parsedFlag = AppFlag.identifierToFlag(p_argString.charAt(0));
+                final char c = p_argString.charAt(0);
+                parsedFlag = AppFlag.identifierToFlag(c);
+                AppParser.addParserFlag(p_parserFlags, c);
             }
 
             default -> {
                 for (int i = 0; i < p_length; ++i) {
                     final char c = p_argString.charAt(i);
-
-                    switch (c) {
-                        case '-' -> {
-                            continue;
-                        }
-
-                        // Couldn't use `enum`s around here! <Sigh>...:
-                        case 'r' -> p_parserFlags.add(AppParserFlag.READ_SQL_PATH);
-                        case 'f' -> p_parserFlags.add(AppParserFlag.READ_CONF_PATH);
-                        case 'x' -> p_parserFlags.add(AppParserFlag.READ_CONF_ENTRY);
-                        // `default` is just... breaking out, I guess:
-                    }
-
                     parsedFlag = AppFlag.identifierToFlag(c);
+                    AppParser.addParserFlag(p_parserFlags, c);
                 }
             } // End of `default` block.
         } // End of `switch`.
@@ -305,6 +295,20 @@ public class AppParser {
 
         p_flags.put(parsedFlag, "");
         return true;
+    }
+
+    private static void addParserFlag(final Queue<AppParserFlag> p_parserFlags, final char c) {
+        switch (c) {
+            // default -> {
+            // continue;
+            // }
+
+            // Couldn't use `enum`s around here! <Sigh>...:
+            case 'r' -> p_parserFlags.add(AppParserFlag.READ_SQL_PATH);
+            case 'f' -> p_parserFlags.add(AppParserFlag.READ_CONF_PATH);
+            case 'x' -> p_parserFlags.add(AppParserFlag.READ_CONF_ENTRY);
+            // `default` is just... breaking out, I guess:
+        }
     }
 
 }

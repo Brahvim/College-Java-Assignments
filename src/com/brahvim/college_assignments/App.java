@@ -36,8 +36,12 @@ public class App {
 
 		final Map<AppConfigEntry, String> configuration = /* */
 				AppParser.beginAllParsing(p_args);
-		// AppParser.beginAllParsing(new String[] { "-r", "./Test.sql", "-x", "HOST",
-		// "-r", "./Test.sql" });
+		// AppParser.beginAllParsing(new String[] {
+		// // "-i",
+		// // "r", "./Test.sql",
+		// // "-f", "./.env",
+		// // "x", "HOST",
+		// });
 
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 		App.askUserForAbsentConfigs(configuration);
@@ -239,6 +243,46 @@ public class App {
 	}
 
 	public static void exit(final AppExitCode p_flag) {
+		switch (p_flag) {
+
+			case CONF_PATH_INVALID -> {
+				System.out.println("Path to configuration file provided via `-f` was not valid.");
+			}
+
+			case ENTRY_INVALID -> {
+				System.out.println("One of the config entries to be ignored via `-x` was not valid.");
+			}
+
+			case FLAG_PARSING_ERROR -> {
+				System.out.println("Error parsing flags...");
+			}
+
+			case INVALID_CONFIG_FILE -> {
+				System.out.println("Error in configuration file...");
+			}
+
+			case IO_ISSUE -> {
+				System.out.println("I/O error of some kind. Do your SQL scripts and config file exist?");
+			}
+
+			case SQL_ERROR -> {
+				System.out.println("There was an error in the SQL syntax in one of your files.");
+			}
+
+			case SQL_PATH_INVALID -> {
+				System.out.println("One of the paths you provided for SQL files via `-r` doesn't have a file.");
+			}
+
+			case UNKNOWN_FLAG_PASSED -> {
+				System.out.println("Unknown flag passed...");
+			}
+
+			case OKAY -> {
+				// It's okay! ^-^
+			}
+
+		}
+
 		System.exit(p_flag.ordinal());
 	}
 
