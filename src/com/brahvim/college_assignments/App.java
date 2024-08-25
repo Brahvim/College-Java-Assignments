@@ -133,7 +133,12 @@ public class App {
 		final File file = new File(p_path);
 		final StringBuilder fullStatementStringBuilder = new StringBuilder();
 
-		try (final var reader = new BufferedReader(new FileReader(file))) {
+		try (
+
+				final var reader = new BufferedReader(new FileReader(file));
+				final var statement = p_connection.createStatement();
+
+		) {
 
 			System.out.printf("- Executing script at path `%s`:%n", p_path);
 
@@ -150,12 +155,11 @@ public class App {
 					continue;
 				}
 
-				final var statement = p_connection.createStatement();
-				statement.execute(fullStatementStringBuilder.toString());
-				statement.close();
-
+				statement.addBatch(fullStatementStringBuilder.toString());
 				fullStatementStringBuilder.setLength(0);
 			}
+
+			statement.executeBatch();
 
 		} catch (final SecurityException e) {
 			System.out.printf("VM not allowed to open script file at `%s%`.%n", p_path);
