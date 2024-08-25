@@ -143,7 +143,13 @@ public class AppParser {
                 final AppConfigEntry configEntry = AppConfigEntry.valueOf(entryName);
 
                 // If the value from the config file is empty:
-                if ("".equals(value)) { // If there is no value, leave it `null`!
+                if ("".equals(value)) { // If there's no value, leave it `null`!
+                    line = null;
+                    continue;
+                }
+
+                if ("".equals(p_config.get(configEntry))) { // If there was no value earlier, do the same!
+                    p_config.put(configEntry, null);
                     line = null;
                     continue;
                 }

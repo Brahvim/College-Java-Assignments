@@ -36,10 +36,11 @@ public class App {
 
 		final Map<AppConfigEntry, String> configuration = /* */
 				// AppParser.beginAllParsing(p_args);
-				AppParser.beginAllParsing(new String[] { "-r", "./Test.sql" });
+				AppParser.beginAllParsing(new String[] {
+						// "-r", "./Test.sql",
+						"-x", "HOST" });
 
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
-
 		App.askUserForAbsentConfigs(configuration);
 
 		final String dbUrl = AppDbUtils.formJdbcUrl(configuration);
