@@ -6,10 +6,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BooleanSupplier;
 
 import com.brahvim.college_assignments.enums.AppConfigEntry;
 import com.brahvim.college_assignments.enums.AppExitCode;
@@ -83,6 +85,8 @@ public class AppParser {
             String line = null;
             boolean hasErrors = false;
 
+            // NOTE: If you have to use `continue`, SET `line` TO `null`!
+
             for (int i = 0; reader.ready();) {
 
                 if (line == null)
@@ -91,17 +95,22 @@ public class AppParser {
                 final int commentStart = line.indexOf('#');
 
                 switch (commentStart) {
+
                     case -1 -> {
                         // Nothing!
                         // DON'T remove this case!
                         // It's here to ensure that `default` isn't executed!
                     }
+
                     case 0 -> {
+                        line = null;
                         continue;
                     }
+
                     default -> {
                         line = line.substring(0, commentStart - 1);
                     }
+
                 }
 
                 final int separatorId = line.indexOf('=');
@@ -195,8 +204,13 @@ public class AppParser {
         final int length = p_argString.length();
         final AppParserFlag polledParserFlag = p_parserFlags.poll();
 
-        AppParser.processParserFlags(p_argString, polledParserFlag, p_configuration);
-        AppParser.processAppFlags(length, p_argString, p_flags, p_parserFlags);
+        final var stages = new ArrayList<BooleanSupplier>(2);
+        stages.add(() -> AppParser.processParserFlags(p_argString, polledParserFlag, p_configuration));
+        stages.add(() -> AppParser.processAppFlags(length, p_argString, p_flags, p_parserFlags));
+
+        for (final var s : stages)
+            if (!s.getAsBoolean())
+                break;
     }
 
     private static void endConfigFileErrors() {
@@ -207,7 +221,9 @@ public class AppParser {
         System.out.println("\n=======CONFIG FILE ERRORS!=======\n");
     }
 
-    private static void processParserFlags(
+    // You, sir, are allowed to ask for skipping this iteration.
+    // That's why you return a `boolean`.
+    private static boolean processParserFlags(
             final String p_argString,
             final AppParserFlag p_polledParserFlag,
             final Map<AppConfigEntry, String> p_configuration) {
@@ -219,6 +235,7 @@ public class AppParser {
                         p_configuration.put(AppConfigEntry.PATH, p_argString);
                     else
                         App.exit(AppExitCode.PATH_INVALID);
+                    return false;
                 }
 
                 case READ_ENTRY -> {
@@ -228,12 +245,14 @@ public class AppParser {
                         App.exit(AppExitCode.ENTRY_INVALID);
                     else
                         p_configuration.put(e, "");
+                    return false;
                 }
 
             }
+        return true;
     }
 
-    private static void processAppFlags(
+    private static boolean processAppFlags(
             final int p_length,
             final String p_argString,
             final Map<AppFlag, String> p_flags,
@@ -259,8 +278,8 @@ public class AppParser {
                         }
 
                         // Couldn't use `enum`s around here! <Sigh>...:
-                        case 'x' -> p_parserFlags.add(AppParserFlag.READ_PATH);
-                        case 'f' -> p_parserFlags.add(AppParserFlag.READ_ENTRY);
+                        case 'f' -> p_parserFlags.add(AppParserFlag.READ_PATH);
+                        case 'x' -> p_parserFlags.add(AppParserFlag.READ_ENTRY);
                         // `default` is just... breaking out, I guess:
                     }
 
@@ -273,6 +292,7 @@ public class AppParser {
             App.exit(AppExitCode.UNKNOWN_FLAG_PASSED);
 
         p_flags.put(parsedFlag, "");
+        return true;
     }
 
 }

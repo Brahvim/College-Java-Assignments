@@ -21,13 +21,15 @@ public class AppDbUtils {
 
 	public static Connection ensureConnection(final Map<AppConfigEntry, String> p_config) throws SQLException {
 		for (final var e : AppConfigEntry.values()) {
-			if (p_config.containsKey(e))
+			final String oldValue = p_config.get(e);
+
+			if (!AppDbUtils.stringNotNullOrEmpty(oldValue))
 				continue;
 
 			System.out.printf(
 
 					"".equals(p_config.get(e))
-							? "Entry for `%s` in the file ignored. Please provide new entry data:"
+							? "Entry for `%s` in the file ignored. Please provide new entry data: "
 							: "Did not find an entry for `%s` in the config file. Please provide it: ",
 					e.toString()
 
@@ -72,6 +74,10 @@ public class AppDbUtils {
 
 		System.out.printf("Connecting to `%s` server at: `%s`.%n", driver, urlString);
 		return DriverManager.getConnection(urlString, user, pass);
+	}
+
+	public static boolean stringNotNullOrEmpty(final String p_string) {
+		return p_string == null || "".equals(p_string);
 	}
 
 	public static void runQueryForConnection(final String p_query, final Connection p_connection) {

@@ -28,16 +28,13 @@ public class App {
 		// are two; the other one's used for JDK classes and is called the "bootstrap
 		// loader", ...I think.)
 
-		final Map<AppConfigEntry, String> configuration = AppParser.beginAllParsing(new String[] { "-x", "PASS" });
-
+		final Map<AppConfigEntry, String> configuration = AppParser.beginAllParsing(p_args);
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
 		// Now we'll establish a connection with the DB:
-		try (
-				final Connection connection = AppDbUtils.ensureConnection(configuration)) {
+		try (final Connection connection = AppDbUtils.ensureConnection(configuration)) {
 
 			System.out.println("Connected! Please go on:\n");
-
 			final StringBuilder fullStatementStringBuilder = new StringBuilder();
 			final String statementBegin = String.format("[%s])> ", configuration.get(AppConfigEntry.DRIVER));
 
