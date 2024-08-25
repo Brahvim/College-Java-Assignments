@@ -145,21 +145,24 @@ public class App {
 				fullStatementStringBuilder.append(line);
 
 				// Using these instead of `String::endsWith()` for performance:
-				if (!line.isEmpty() && ';' == line.charAt(line.length() - 1)) {
-					try (final var statement = p_connection.createStatement()) {
-						statement.execute(fullStatementStringBuilder.toString());
-					} catch (final SQLException e) {
-						System.out.println("ERROR! Crashing...");
-						App.exit(AppExitCode.SQL_ERROR);
-					}
-
-					fullStatementStringBuilder.setLength(0);
+				if (line.isEmpty() || ';' != line.charAt(line.length() - 1)) {
+					fullStatementStringBuilder.append(' ');
 					continue;
 				}
 
-				fullStatementStringBuilder.append(' ');
+				final var statement = p_connection.createStatement();
+				statement.execute(fullStatementStringBuilder.toString());
+				statement.close();
+
+				fullStatementStringBuilder.setLength(0);
 			}
 
+		} catch (final SecurityException e) {
+			System.out.printf("VM not allowed to open script file at `%s%`.%n", p_path);
+			App.exit(AppExitCode.SQL_PATH_INVALID);
+		} catch (final SQLException e) {
+			System.out.println("ERROR! Crashing...");
+			App.exit(AppExitCode.SQL_ERROR);
 		} catch (final IOException e) {
 			if (e instanceof FileNotFoundException) {
 				if (file.isDirectory())
@@ -171,9 +174,6 @@ public class App {
 
 			System.out.println("I/O issues reading script; crashing...");
 			App.exit(AppExitCode.IO_ISSUE);
-		} catch (final SecurityException e) {
-			System.out.printf("VM not allowed to open script file at `%s%`.%n", p_path);
-			App.exit(AppExitCode.SQL_PATH_INVALID);
 		}
 
 	}
