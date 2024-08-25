@@ -35,8 +35,8 @@ public class App {
 		// loader", ...I think.)
 
 		final Map<AppConfigEntry, String> configuration = /* */
-				AppParser.beginAllParsing(p_args);
-		// AppParser.beginAllParsing(new String[] { "-r", "./Test.sql" });
+				// AppParser.beginAllParsing(p_args);
+				AppParser.beginAllParsing(new String[] { "-r", "./Test.sql" });
 
 		System.out.println("Welcome to \"Yet Another DB CLI\"...");
 
@@ -114,7 +114,10 @@ public class App {
 	public static void runSqlFiles(final Connection p_connection, final Map<AppConfigEntry, String> p_configuration) {
 		final String[] quotedPaths = p_configuration.get(AppConfigEntry.SQL_PATH).split(", ");
 
-		if (quotedPaths.length < 2 || quotedPaths[0].isEmpty())
+		if (quotedPaths.length == 0)
+			return;
+
+		if (quotedPaths.length == 1 && quotedPaths[0].isEmpty())
 			return;
 
 		System.out.println("Running scripts:");

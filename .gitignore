@@ -2,6 +2,7 @@
 bin
 
 # Files:
+College-Java-Assignments.jar
 Test.sql
 .env
 # (See `example.env` instead.)
