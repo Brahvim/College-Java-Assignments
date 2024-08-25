@@ -19,50 +19,24 @@ public class AppDbUtils {
 		throw new IllegalAccessError();
 	}
 
-	public static Connection ensureConnection(final Map<AppConfigEntry, String> p_config) throws SQLException {
-		for (final var e : AppConfigEntry.values()) {
-			final String oldValue = p_config.get(e);
+	public static Connection connectToDb(
+			final String p_urlString,
+			final Map<AppConfigEntry, String> p_config) throws SQLException {
+		final String
+		/*	 */ pass = p_config.get(AppConfigEntry.PASS),
+				user = p_config.get(AppConfigEntry.USER);
+		return DriverManager.getConnection(p_urlString, user, pass);
+	}
 
-			if (!AppDbUtils.stringNotNullOrEmpty(oldValue))
-				continue;
-
-			System.out.printf(
-
-					"".equals(p_config.get(e))
-							? "Entry for `%s` in the file ignored. Please provide new entry data: "
-							: "Did not find an entry for `%s` in the config file. Please provide it: ",
-					e.toString()
-
-			);
-
-			String value = "";
-			boolean valid = false;
-
-			while (!valid) {
-				switch (e) {
-					default -> value = System.console().readLine();
-					case PASS -> value = new String(System.console().readPassword());
-				}
-
-				valid = e.getChecker().apply(value) == null;
-
-				if (valid)
-					break;
-			}
-
-			p_config.put(e, value);
-		}
-
+	public static String formJdbcUrl(final Map<AppConfigEntry, String> p_config) {
 		final String
 		/*	 */ db = p_config.get(AppConfigEntry.DB),
 				host = p_config.get(AppConfigEntry.HOST),
 				port = p_config.get(AppConfigEntry.PORT),
-				pass = p_config.get(AppConfigEntry.PASS),
-				user = p_config.get(AppConfigEntry.USER),
 				driver = p_config.get(AppConfigEntry.DRIVER);
 
 		// First, we derive the URL to send HTTPS requests to:
-		final String urlString = String.format(
+		return String.format(
 
 				"jdbc:%s://%s:%s/%s",
 				driver,
@@ -71,13 +45,6 @@ public class AppDbUtils {
 				db
 
 		);
-
-		System.out.printf("Connecting to `%s` server at: `%s`.%n", driver, urlString);
-		return DriverManager.getConnection(urlString, user, pass);
-	}
-
-	public static boolean stringNotNullOrEmpty(final String p_string) {
-		return p_string == null || "".equals(p_string);
 	}
 
 	public static void runQueryForConnection(final String p_query, final Connection p_connection) {

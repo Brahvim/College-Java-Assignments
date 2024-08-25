@@ -6,10 +6,10 @@ import java.util.Map;
 public enum AppFlag {
 
     CONF_PATH('f'),
-    SKIP_ENTRY('x'),
+    RUN_SCRIPT('r'),
     IGNORE_CONF('i'),
+    IGNORE_ENTRY('x'),
     CHECK_CONF_AND_EXIT('c')
-
     /*  */;
 
     // region Class stuff.
