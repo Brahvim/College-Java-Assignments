@@ -1,21 +1,37 @@
 package com.brahvim.college_assignments;
 
-import java.applet.Applet;
+import java.awt.Graphics;
 
-@Deprecated
-public class App extends Applet {
+import javax.swing.JApplet;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+
+public class App extends JApplet {
 
 	public static void main(final String[] p_args) {
+		final JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
 		final App app = new App();
-		app.start();
+		frame.add(app);
+		app.init();
+
+		frame.pack();
+		frame.setSize(480, 360);
+		frame.setVisible(true);
 	}
 
 	@Override
-	public void start() {
-		System.out.println("Started!");
+	public void paint(final Graphics p_context) {
+		p_context.drawString("Hi!", super.getWidth() / 2, super.getHeight() / 2);
+	}
+
+	@Override
+	public void init() {
+		System.out.println("Applet initiated.");
 		System.out.printf("Applet info string: `%s`%n", super.getAppletInfo());
 
-		// *STRAIGHT* to an NPE!:
+		// *Still causes* an NPE! :/
 		// System.out.printf("Applet context: `%s`%n", super.getAppletContext());
 	}
 
