@@ -9,7 +9,6 @@ public class App {
 
         final Scanner sc = new Scanner(System.in);
         final long userInput = sc.nextLong();
-        sc.close();
 
         long sum = 0;
         long number = userInput;
